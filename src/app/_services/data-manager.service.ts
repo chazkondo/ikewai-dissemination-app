@@ -11,35 +11,97 @@ export class DataManagerService {
 
     constructor() { }
 
-    registerDataStream(stream: Observable<QueryResponse>): DataController {
-        return new DataController(stream);
-    }
-
 
 }
 
+//how to handle filter integration?
+
+//sorting and conditions need to be separated
+//sorting should be global so all can use the same index
+//conditions handled locally and evaluated on access without index (shouldn't impact performance too much, keeping indexes for any used condition combo could get very large)
+
+//switch filter manager to sorting registry, key hierarchy for sorting field should be registered with the sorting function (one sorting function per key hierarchy)
+//can add specialization tag to maintain generality, if for some reason need multiple sorting algorithms with the same key can add an optional tag to identify
+//have something register the desired sorting algorithms for each key in metadata
+//filters should have key/tag combo for any referenced sorter
+//sorting registry entries should have an observable that emits when the sorter changed/deleted, data controller can listen and invalidate index if this happens (probably never used, but good to have)
+//remember to add order to filter, sort forward or in reverse
+
+//indexes generated on first access (can use webworkers for index generation to maintain responsiveness during generation)
 export class DataController {
 
     private data: Metadata[];
-    private state: OutputState
+    private defaultState: OutputState;
+    private filterMap: Map<Filter, OutputState>;
 
-    //provide filter and order (e.g. 1 or -1), instead of having separate filters for different orders
-    //have data retreival methods here, have filter as an input, add index manager to deal with indices
-
-    constructor(defaultChunkSize: number) {
-        this.state = {
+    //allow an initial set of indexes to be created, data inserted in index as received
+    constructor(defaultChunkSize: number, initIndexes) {
+        this.defaultState = {
             chunkSize: defaultChunkSize,
-            lastRequest: null
+            lastRequest: null,
+            lastCall: null
         };
+        this.filterMap = new Map();
     }
 
+    //have a way to mark indexes as dirty if new data added
+    //also track indexes that have been accessed frequently recently and update those automatically
     addData(data: Metadata[]) {
         data.concat(data);
     }
 
+    //get last data request again (can be used if filter updated or more data received (added data may change ordering/invalidate index))
+    refresh(filter: Filter): Promise<DataRequestWrapper> {
+        //throw new Error("Refresh not implemented");
+
+        let state = this.filterMap.get(filter);
+        if(state == undefined) {
+            state = this.initializeFilterState(filter);
+        }
+        return state.lastCall.then((call: CallData) => {
+            return call.f(...call.params);
+        });
+    }
+
+    private initializeFilterState(filter: Filter): OutputState {
+        //copy default state data to new state
+        let initFilter: OutputState = {
+            chunkSize: this.defaultState.chunkSize,
+            lastRequest: this.defaultState.lastRequest,
+            lastCall: this.defaultState.lastCall
+        }
+        this.filterMap.set(filter, initFilter);
+        return initFilter;
+    }
+
     //stateless data request
-    requestDataRange(filter: Filter, range: [number, number]) {
-        let data = this.data.slice(lower, upper);
+    requestDataRange(filter: Filter, range: [number, number]): Promise<DataRequestWrapper> {
+        return this.internalRequestDataRange(filter, range, true);
+    }
+
+    //use for determining if state's last call was set elsewhere, use when finish implementing refresh
+    private internalRequestDataRange(filter: Filter, range: [number, number], setLastCall: boolean): Promise<DataRequestWrapper> {
+        if(setLastCall) {
+            let state = this.filterMap.get(filter);
+            if(state == undefined) {
+                state = this.initializeFilterState(filter);
+            }
+            state.lastCall = Promise.resolve({
+                f: this.internalRequestDataRange,
+                params: Array.from(arguments)
+            });
+        }
+
+        if(range[1] == null) {
+            range[1] = this.data.length;
+        }
+        //for now no sorting/indexing, so just get data and return an immediately resolved promise
+        let data: Metadata[] = this.data.slice(range[0], range[1]);
+        let retreivedRange: [number, number] = [range[0], range[0] + data.length];
+        return Promise.resolve({
+            range: retreivedRange,
+            data: data
+        });
     }
 
     //data manager shouldn't care about future changes, only its current state
@@ -50,76 +112,207 @@ export class DataController {
     //make sure data refresh follows the request pattern, if requesting a specific item then make sure to lock focus on this item
 
     //stateful data request, retreives data in chunks
-    requestChunk(filter: Filter, order: boolean, entry: number, chunkSize?: number): Promise<Metadata[]> {
+    requestChunk(filter: Filter, order: boolean, entry: number, chunkSize?: number): Promise<DataRequestWrapper> {
+        let state = this.filterMap.get(filter);
+        if(state == undefined) {
+            state = this.initializeFilterState(filter);
+        }
         if(chunkSize == undefined) {
-            chunkSize = this.state.chunkSize;
+            chunkSize = state.chunkSize;
+        }
+        else {
+            state.chunkSize = chunkSize;
         }
         let lower = Math.floor(entry / chunkSize);
         let upper = lower + chunkSize;
-        let data = this.requestDataRange(filter, [lower, upper]);
-        this.state.lastRequest = Promise.resolve([lower, lower + data.length]);
-        //for now no sorting/indexing, so return an immediately resolved promise
-        return Promise.resolve(data);
+        let dataPromise = this.internalRequestDataRange(filter, [lower, upper], false);
+        state.lastRequest = dataPromise.then((data: DataRequestWrapper) => {
+            return data.range;
+        });
+        state.lastCall = Promise.resolve({
+            f: this.requestChunk,
+            params: Array.from(arguments)
+        });
+        return dataPromise;
     }
 
-
-    next(filter: Filter): Promise<Metadata> {
-        if(this.state.lastRequest == null) {
+    next(filter: Filter): Promise<DataRequestWrapper> {
+        let state = this.filterMap.get(filter);
+        if(state == undefined) {
             throw new Error("next called before stream initialized: requestData must be called before stateful next or previous to initialize data position");
         }
-        this.state.lastRequest.then((range: [number, number]) => {
 
+        let lastRequestResolver: DeferredPromiseResolver;
+        let lastRequest: Promise<[number, number]> = new Promise<[number, number]>((resolve, reject) => {
+            lastRequestResolver = {
+                resolve: resolve,
+                reject: reject
+            }
         });
+        state.lastRequest = lastRequest;
+        
+        let lastCallResolver: DeferredPromiseResolver;
+        let lastCall: Promise<CallData> = new Promise<CallData>((resolve, reject) => {
+            lastCallResolver = {
+                resolve: resolve,
+                reject: reject
+            }
+        });
+        state.lastCall = lastCall;
+
+        let dataPromise: Promise<DataRequestWrapper> = state.lastRequest.then((last: [number, number]) => {
+            let lower = last[1];
+            let upper = lower + state.chunkSize;
+            let range: [number, number] = [lower, upper];
+            lastRequestResolver.resolve(range);
+            let params: [Filter, [number, number], boolean] = [filter, range, false]
+            lastCallResolver.resolve({
+                f: this.requestChunk,
+                params: params                    
+            })
+            return this.internalRequestDataRange(filter, [lower, upper], false);
+        });
+        
+        //no
+        //state.lastCall = [this.next, arguments];
+        return dataPromise;
     }
 
-    previous(filterHandle: FilterHandle): Promise<[number, number]> {
-        let port = this.dataPorts[filterHandle];
-        if(port == undefined) {
-        throw new Error("Invalid filter handle: the filter handle does not have an associated data port");
+    previous(filter: Filter): Promise<DataRequestWrapper> {
+        let state = this.filterMap.get(filter);
+        if(state == undefined) {
+            throw new Error("previous called before stream initialized: requestData must be called before stateful next or previous to initialize data position");
         }
-        if(port.lastRequest == null) {
-        throw new Error("next called before stream initialized: requestData must be called before stateful next or previous to initialize stream state");
-        }
-        //don't try to get current request until last request is properly handled and returned to ensure ordering
-        let dataListener = port.lastRequest.then((last: [number, number]) => {
-        //if already at 0 lower bound just ignore and return null for current
-        if(last[0] == 0) {
-            return {
-            last: last,
-            current: null
-            };
-        }
-        //if chunk size doesn't fit properly and lower bound less than 0, realign to 0 (failsafe, should never actually happen since requestData should align)
-        let lower = Math.max(last[0] - port.chunkSize, 0);
-        let upper = lower + port.chunkSize;
-        let range: [number, number] = [lower, upper];
 
-        return this.generateChunkRetreivalPromise(filterHandle, last, range);
+        let lastRequestResolver: DeferredPromiseResolver;
+        let lastRequest: Promise<[number, number]> = new Promise<[number, number]>((resolve, reject) => {
+            lastRequestResolver = {
+                resolve: resolve,
+                reject: reject
+            }
+        });
+        state.lastRequest = lastRequest;
+
+        let lastCallResolver: DeferredPromiseResolver;
+        let lastCall: Promise<CallData> = new Promise<CallData>((resolve, reject) => {
+            lastCallResolver = {
+                resolve: resolve,
+                reject: reject
+            }
+        });
+        state.lastCall = lastCall;
+
+        let dataPromise: Promise<DataRequestWrapper> = state.lastRequest.then((last: [number, number]) => {
+            let lower = Math.max(last[0] - state.chunkSize, 0);
+            //realign to 0 if necessary (failsafe, should always be aligned with chunk size)
+            let upper = lower + state.chunkSize;
+            let range: [number, number] = [lower, upper];
+            lastRequestResolver.resolve(range);
+            let params: [Filter, [number, number], boolean] = [filter, range, false]
+            lastCallResolver.resolve({
+                f: this.requestChunk,
+                params: params                    
+            })
+            return this.internalRequestDataRange(...params);
         });
 
-        return this.generateResultAndSetState(filterHandle, port, dataListener);
+        return dataPromise;
     }
 
     //use filter manager to define a set of sorters and their sorting functions globally
     //should only have one sorting function defined for each sorted element
-    private sorterToString(sortTag: string[], delim?: string): string {
+    private sorterToString(sortKey: string[], tag?: string, delim?: string): string {
         if(delim == undefined) {
             delim = String.fromCharCode(0xff);
         }
         let s = "";
         let i: number;
-        for(i = 0; i < sortTag.length; i++) {
-            s += sortTag[i] + delim;
+        for(i = 0; i < sortKey.length; i++) {
+            s += sortKey[i] + delim;
+        }
+        if(tag != undefined) {
+            s += tag;
         }
         return s;
     }
-    
-
 }
+
+interface DeferredPromiseResolver {
+    resolve: any,
+    reject: any
+}
+
+// //Promise that can be externally resolved
+// class DeferredPromise<T> {
+//     private promiseData: {
+//         promise: Promise<T>,
+//         resolve: any,
+//         reject: any
+//     };
+
+//     then = Promise.prototype.then;
+//     catch = Promise.prototype.catch;
+//     finally = Promise.prototype.finally;
+    
+//     constructor() {
+//         this.promiseData = {
+//             promise: null,
+//             resolve: null,
+//             reject: null
+//         }
+//         let executor = (resolve, reject) => {
+//             this.promiseData.resolve = resolve;
+//             this.promiseData.reject = reject;
+//         }
+//         this.promiseData.promise = new Promise<T>(executor);
+//     }
+
+//     resolve(data: T) {
+//         if(this.promiseData.resolve == null) {
+//             setTimeout(() => {
+//                 this.resolve(data);
+//             }, 0);
+//         }
+//         else {
+//             this.promiseData.resolve(data)
+//         }
+//     }
+
+//     reject(data: T) {
+//         if(this.promiseData.reject == null) {
+//             setTimeout(() => {
+//                 this.reject(data);
+//             }, 0);
+//         }
+//         else {
+//             this.promiseData.reject(data)
+//         }
+//     }
+
+//     // then(onfulfilled?: (value: T) => any, onrejected?: (value: T) => any): Promise<any> {
+//     //     return this.promiseData.promise.then(onfulfilled, onrejected);
+//     // }
+// }
 
 interface OutputState {
     chunkSize: number,
-    lastRequest: Promise<[number, number]>
+    lastRequest: Promise<[number, number]>,
+    lastCall: Promise<CallData>
+}
+
+interface CallData {
+    f: (...params) => Promise<DataRequestWrapper>,
+    params: any[]
+}
+
+// interface CallTrace {
+//     lastCall: [(...params) => Promise<DataRequestWrapper>, IArguments],
+//     lastState: OutputState
+// }
+
+export interface DataRequestWrapper {
+    range: [number, number]
+    data: Metadata[]
 }
 
 class IndexManager {
