@@ -39,7 +39,7 @@
       <tr>
           <th>ID</th>
           <th>Name</th>
-          <th>Drilled</th>
+          <th>Type</th>
           <th>Lat,Long</th>
           <th>Files</th>
       </tr>
@@ -53,10 +53,8 @@
             <span #entries>{{metadatum.value.well_name}}</span>
           </td>
           <td >
-            <span *ngIf="metadatum.name == 'Well'">
-              {{metadatum.value.yr_drilled}}</span>
-              <span *ngIf="metadatum.name == 'Water_Quality_Site'">{{metadatum.value.ProviderName}}</span>
-          </td>
+              {{metadatum.name.replace('_',' ').replace('_',' ').replace('_',' ')}}
+            </td>
           <td >
               {{metadatum.value.latitude}},
                   {{metadatum.value.longitude}}
