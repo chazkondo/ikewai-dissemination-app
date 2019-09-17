@@ -71,6 +71,7 @@ export class QueryCacheService {
         fetchedData = data.fetch(range);
       }
     }
+    console.log(fetchedData);
     return fetchedData;
   }
   

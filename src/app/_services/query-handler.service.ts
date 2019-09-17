@@ -238,6 +238,7 @@ export class QueryHandlerService {
         },
         data: stored.data
       }
+      console.log(response);
       dataStream.next(response);
     }
 
