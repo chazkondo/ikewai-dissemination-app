@@ -14,7 +14,7 @@ import { AppConfig } from '../_services/config.service';
 //import { SpatialService } from '../_services/spatial.service'
 import { QueryHandlerService, QueryController, QueryResponse } from '../_services/query-handler.service';
 import { FilterHandle, FilterManagerService, Filter, FilterMode } from '../_services/filter-manager.service';
-import { mapToExpression } from '@angular/compiler/src/render3/view/util';
+//import { mapToExpression } from '@angular/compiler/src/render3/view/util';
 import { HttpClient, HttpHeaders, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { FeatureCollection } from 'geojson';
 
