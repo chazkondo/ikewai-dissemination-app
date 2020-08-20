@@ -210,6 +210,22 @@ export class QueryHandlerService {
     return new QueryController(subjects);
   }
 
+  allSearch(): QueryController {
+    // let res: QueryResults = {
+    //   handle: this.handleGen.getHandle(),
+    //   dataStream: new Observable<QueryResponse>()
+    // };
+    let subjects = [];
+    let i;
+    //for(i = 0; i < features.length; i++) {
+      //need to do something to handle too long queries
+      let query = "{'$and':[{'name':'DataDescriptor'},{'value.pushedToHydroshare':true}]}";
+      subjects.push(this.handleQuery(query));
+    //}
+
+    return new QueryController(subjects);
+  }
+
   //deal with case where same query running multiple times before complete
   private handleQuery(query: string): BehaviorSubject<QueryResponse> {
     let dataStream = new BehaviorSubject<QueryResponse>({status: null, data: []});

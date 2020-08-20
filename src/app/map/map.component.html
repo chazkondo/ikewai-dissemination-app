@@ -1,5 +1,35 @@
 <div class="row">
-    <div class="col-md-7">
+  <div *ngIf="selectedMetadata" class="col-md-12 jumbotron jumbotron-fluid">
+    <div style="float: right; padding-right:10px;">
+      <a href="#" class=" btn btn-info btn-sm" (click)="deselectDataDescriptor()">X</a>
+    </div>
+    <div class="container">
+      <h4>{{selectedMetadata.value.title}}</h4>
+      <b>DOI: </b>&nbsp;{{selectedMetadata.value.doi}}<br/>
+      <b>Data Published:</b>&nbsp;{{selectedMetadata.value.gotDOIDate}}<br/>
+      <b>Start Date</b>&nbsp;{{selectedMetadata.value.start_datetime}} &nbsp; &nbsp;
+      <b>End Date</b>&nbsp;{{selectedMetadata.value.end_datetime}}<br/>
+      <b>Authors:</b>
+      <span *ngFor="let author of selectedMetadata.value.creators ">
+        {{author.first_name}} {{author.last_name}},
+      </span><br/>
+      <b>Subjects:</b>&nbsp;{{selectedMetadata.value.subjects}}<br/>
+      <b>License:</b>&nbsp;{{selectedMetadata.value.license_rights}}<br/>
+      <b>Data Type:</b>&nbsp;{{selectedMetadata.value.data_types}}<br/>
+			<b>Format:</b>&nbsp;{{selectedMetadata.value.formats}}<br/>
+      <b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/>
+      <b>Data: </b><span *ngFor="let link of selectedMetadata._links.associationIds ">
+        &nbsp;<a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
+      </span>
+      <div style="float: right; padding-right:10px;">
+        <a href="#" class="btn btn-info btn-sm" (click)="deselectDataDescriptor()">Close</a>
+      </div>
+      <br/><br/>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <!--- <div class="col-md-7">
       <div leaflet class="map pull-left"
         leafletDraw
         [leafletOptions]="options"
@@ -7,8 +37,8 @@
         (leafletDrawCreated)="onDrawCreated($event)"
         (leafletMapReady)="onMapReady($event)" >
       </div>
-    </div>
-    <div class="col-md-5">
+    </div>-->
+    <div class="col-md-12">
     <!-- <div class="grid">
       <div class="bl">Color Legend</div>
       <div class="ht">Cluster Size</div>
@@ -37,33 +67,21 @@
     <div style="overflow: auto; height:500px;" class="table-responsive">
     <table class="table">
       <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Lat,Long</th>
+          <th>Title</th>
+          <th>DOI</th>
           <th>Files</th>
       </tr>
       <tr *ngFor="let metadatum of filterData">
-          <td >
-              {{metadatum.value.wid}}{{metadatum.value.MonitoringLocationIdentifier}}
-          </td>
+          
           <td width="40%">
-            <span #entries>{{metadatum.value.name}}</span>
-            <span #entries>{{metadatum.value.station_name}}</span>
-            <span #entries>{{metadatum.value.well_name}}</span>
+            <a href="#" class="btn btn-info btn-sm" (click)="selectDataDescriptor(metadatum)">View</a>
+            <span #entries>{{metadatum.value.title}}</span>
           </td>
-          <td >
-              {{metadatum.name.replace('_',' ').replace('_',' ').replace('_',' ')}}
-            </td>
-          <td >
-              {{metadatum.value.latitude}},
-                  {{metadatum.value.longitude}}
+          <td>
+            <span #entries><a href='http://doi.org/{{metadatum.value.doi}}'target='_blank'>{{metadatum.value.doi}}</a></span>
           </td>
           <td width="20%">
-              <span *ngIf="metadatum.name == 'Water_Quality_Site' && metadatum.value.resultCount > 0">
-                  <a class="btn btn-success" href='https://www.waterqualitydata.us/Result/search?siteid={{metadatum.value.MonitoringLocationIdentifier}}&mimeType=csv&zip=yes&sorted=no' target="_blank" > Download {{metadatum.value.resultCount}} Measurements</a>
-              </span>
-            <div *ngIf="metadatum.name == 'Well'">
+            <div >
                 <span *ngFor="let link of metadatum._links.associationIds ">
                   <a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
                 </span>
@@ -74,3 +92,4 @@
       </div>
       </div>
     </div>
+    
