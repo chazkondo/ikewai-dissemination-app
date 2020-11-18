@@ -33,6 +33,10 @@ export class MapComponent implements OnInit, AfterViewInit {
   metadata: Metadata[];
   filterData: Metadata[];
   selectedMetadata: Metadata;
+  assoc_metadata: Metadata[];
+  assoc_locations: Metadata[];
+  assoc_variables: Metadata[];
+  selectedAssocMetadata: Metadata[];
   currentUser: User;
   result: Array<Object>;
 
@@ -168,6 +172,33 @@ export class MapComponent implements OnInit, AfterViewInit {
   }
   selectDataDescriptor(data_descriptor){
     this.selectedMetadata = data_descriptor
+    let datastrm: QueryController = this.queryHandler.fetchAssociateMetadata(data_descriptor.associationIds)
+    datastrm.getQueryObserver().subscribe((data: any) => {
+      data = data.data;
+      //data;
+      if(data == null) {
+        return;
+      }
+      this.selectedAssocMetadata = data;
+      this.assoc_locations = []
+      this.assoc_variables =[]
+      let indices = Object.keys(data);
+      let i: number;
+      for(i = 0; i < indices.length; i++) {
+        let index = Number(indices[i]);
+        let datum = data[index];
+        if (datum.name == 'Site' || datum.name == 'Well' || datum.name == 'Water_Quality_Site'){
+          this.assoc_locations.push(datum)
+        }
+        if (datum.name == 'Variable'){
+          this.assoc_variables.push(datum)
+        }
+      //     this.assoc_metadata.push(datum)
+      //     this.selectedAssocMetadata = this.assoc_metadata;
+      }
+    });
+
+    //this.selectedAssocMetadata = assoc_metadata
   }
 
   deselectDataDescriptor(){

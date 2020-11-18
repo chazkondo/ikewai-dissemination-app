@@ -3,7 +3,9 @@
     <div style="float: right; padding-right:10px;">
       <a href="#" class=" btn btn-info btn-sm" (click)="deselectDataDescriptor()">X</a>
     </div>
+
     <div class="container">
+      <div class="pull-right">
       <h4>{{selectedMetadata.value.title}}</h4>
       <b>DOI: </b>&nbsp;{{selectedMetadata.value.doi}}<br/>
       <b>Data Published:</b>&nbsp;{{selectedMetadata.value.gotDOIDate}}<br/>
@@ -17,7 +19,18 @@
       <b>License:</b>&nbsp;{{selectedMetadata.value.license_rights}}<br/>
       <b>Data Type:</b>&nbsp;{{selectedMetadata.value.data_types}}<br/>
 			<b>Format:</b>&nbsp;{{selectedMetadata.value.formats}}<br/>
+      <span *ngIf="assoc_locations.length > 0"><b>Location(s):</b>&nbsp;
+      <ul *ngFor="let assoc of assoc_locations">
+          <li *ngIf ="assoc.name == 'Site'">{{assoc.value.name}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
+          <li *ngIf ="assoc.name == 'Well'">{{assoc.value.well_name}}({{assoc.value.wid}})({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
+          <li *ngIf ="assoc.name == 'Water_Quality_Site'">{{assoc.value.name}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
+      </ul></span>
+      <span *ngIf= "assoc_variables.length >0"><b>Variables:</b>&nbsp;
+      <ul *ngFor="let assoc of assoc_variables">
+          <li>{{assoc.value.variable_name}}{{assoc.value.units}}</li>
+      </ul></span>
       <b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/>
+
       <b>Data: </b><span *ngFor="let link of selectedMetadata._links.associationIds ">
         &nbsp;<a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
       </span>
@@ -25,6 +38,7 @@
         <a href="#" class="btn btn-info btn-sm" (click)="deselectDataDescriptor()">Close</a>
       </div>
       <br/><br/>
+      </div>
     </div>
   </div>
 </div>
@@ -72,7 +86,7 @@
           <th>Files</th>
       </tr>
       <tr *ngFor="let metadatum of filterData">
-          
+
           <td width="40%">
             <a href="#" class="btn btn-info btn-sm" (click)="selectDataDescriptor(metadatum)">View</a>
             <span #entries>{{metadatum.value.title}}</span>
@@ -92,4 +106,3 @@
       </div>
       </div>
     </div>
-    

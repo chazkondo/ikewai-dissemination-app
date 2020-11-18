@@ -219,10 +219,17 @@ export class QueryHandlerService {
     let i;
     //for(i = 0; i < features.length; i++) {
       //need to do something to handle too long queries
-      let query = "{'$and':[{'name':'DataDescriptor'},{'value.pushedToHydroshare':true}]}";
+      let query = "{$and:[{'name':'DataDescriptor'},{$or:[{'value.pushedToIkewai': true}, {'value.pushedToHydroshare':true}]}]}";
       subjects.push(this.handleQuery(query));
     //}
 
+    return new QueryController(subjects);
+  }
+
+  fetchAssociateMetadata(uuids: any[]): QueryController {
+    let subjects = [];
+    let query = '{"uuid":{"$in":'+JSON.stringify(uuids)+'}}';
+    subjects.push(this.handleQuery(query));
     return new QueryController(subjects);
   }
 
