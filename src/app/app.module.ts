@@ -16,6 +16,7 @@ import { AppConfig } from './_services/config.service';
 
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
+import { DataViewComponent } from './data-view/data-view.component';
 
 export function initializeApp(appConfig: AppConfig) {
   return () => appConfig.load();
@@ -27,7 +28,8 @@ export function initializeApp(appConfig: AppConfig) {
     AppComponent,
     LoginComponent,
     HomeComponent,
-    MapComponent
+    MapComponent,
+    DataViewComponent
   ],
   imports: [
     BrowserModule,

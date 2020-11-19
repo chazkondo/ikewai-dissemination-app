@@ -1,34 +1,37 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ViewChildren, QueryList, ElementRef, Renderer2 } from '@angular/core';
-import { LeafletModule } from '@asymmetrik/ngx-leaflet';
-import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
-import { Observable, of, BehaviorSubject,throwError } from 'rxjs';
-import { map, retry, catchError } from 'rxjs/operators';
-import { User } from '../_models/user'
-import { Metadata } from '../_models/metadata'
-import { latLng, tileLayer, Marker, icon } from 'leaflet';
+import { Component, OnInit, ViewChild, AfterViewInit, ViewChildren, QueryList, ElementRef, Renderer2, Input } from '@angular/core';
+// import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+// import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
+// import { Observable, of, BehaviorSubject,throwError } from 'rxjs';
+// import { map, retry, catchError } from 'rxjs/operators';
+// import { User } from '../_models/user'
+// import { Metadata } from '../_models/metadata'
+// import { latLng, tileLayer, Marker, icon } from 'leaflet';
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
-//import 'leaflet.pm/dist/leaflet.pm.min.js';
-import { AppConfig } from '../_services/config.service';
-//import { AuthenticationService } from '../_services/authentication.service';
-//import { SpatialService } from '../_services/spatial.service'
-import { QueryHandlerService, QueryController, QueryResponse } from '../_services/query-handler.service';
-import { FilterHandle, FilterManagerService, Filter, FilterMode } from '../_services/filter-manager.service';
-import { mapToExpression } from '@angular/compiler/src/render3/view/util';
-import { HttpClient, HttpHeaders, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { ActivatedRoute } from "@angular/router";
+// //import 'leaflet.pm/dist/leaflet.pm.min.js';
+// import { AppConfig } from '../_services/config.service';
+// //import { AuthenticationService } from '../_services/authentication.service';
+// //import { SpatialService } from '../_services/spatial.service'
+// import { QueryHandlerService, QueryController, QueryResponse } from '../_services/query-handler.service';
+// import { FilterHandle, FilterManagerService, Filter, FilterMode } from '../_services/filter-manager.service';
+// import { mapToExpression } from '@angular/compiler/src/render3/view/util';
+// import { HttpClient, HttpHeaders, HttpErrorResponse, HttpParams } from '@angular/common/http';
+// import { ActivatedRoute } from "@angular/router";
 
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css']
 })
-export class MapComponent implements OnInit, AfterViewInit {
+export class MapComponent implements OnInit {
 
-  static readonly DEFAULT_RESULTS = 10;
+  @Input() mapReadyHandler: (map: L.Map) => void;
+  @Input() mapOptions: L.MapOptions;
+  @Input() drawOptions: any;
 
-  @ViewChildren("entries") entries: QueryList<ElementRef>;
+  map: L.Map
 
+<<<<<<< HEAD
   highlightEntries: ElementRef[] = [];
 
   metadata: Metadata[];
@@ -675,137 +678,21 @@ export class MapComponent implements OnInit, AfterViewInit {
     // setTimeout(() => {
     //   dataStream.cancel();
     // }, 2000);
+=======
+>>>>>>> a1f98f3ea30490b2af40614ca2d3fe66f7e49258
 
+  constructor() {}
 
+  ngOnInit(): void {
+  }
+  
+
+  onMapReady(map: L.Map): void {
+    this.map = map
+    this.mapReadyHandler(map);
   }
 
-  getStyleByGroup(group: string): L.PathOptions {
-    let style: L.PathOptions;
-    switch(group) {
-      case "waterQualitySites": {
-        style = {
-          "color": "#238B45",
-          "weight": 3,
-          "opacity": 0.3
-        };
-        break;
-      }
-      case "sites": {
-        style = {
-          "color": "#CB181D",
-          "weight": 3,
-          "opacity": 0.3
-        };
-        break;
-      }
-      case "wells": {
-        style = {
-          "color": "#2171B5",
-          "weight": 3,
-          "opacity": 0.3
-        };
-        break;
-      }
-    }
-    return style;
+  ngOnDestroy(): void {
+    this.map.remove()
   }
-
-  private getIconByGroup(group: string): L.Icon {
-    let icon: L.Icon;
-    switch(group) {
-      case "waterQualitySites": {
-        icon = new L.Icon({
-          iconUrl: 'assets/markers/marker-icon-green.png',
-          iconRetinaUrl: 'assets/markers/marker-icon-2x-green.png',
-          shadowUrl: "assets/marker-shadow.png"
-        });
-        break;
-      }
-      case "sites": {
-        icon = new L.Icon({
-          iconUrl: 'assets/markers/marker-icon-red.png',
-          iconRetinaUrl: 'assets/markers/marker-icon-2x-red.png',
-          shadowUrl: "assets/marker-shadow.png"
-        });
-        break;
-      }
-      case "wells": {
-        icon = new L.Icon({
-          iconUrl: 'assets/marker-icon.png',
-          iconRetinaUrl: 'assets/marker-icon-2x.png',
-          shadowUrl: "assets/marker-shadow.png"
-        });
-        break;
-      }
-    }
-    return icon;
-  }
-
-
-
-  gotoEntry(index: number) {
-    //event.stopPropagation();
-    // this.queryHandler.requestData(this.defaultFilterHandle, index).then((range: [number, number]) => {
-    //   //yield control to allow observable to update entry list
-    //   setTimeout(() => {
-    //     // console.log(index);
-    //     // console.log(range);
-    //     //determine position of data on page
-    //     let entriesArr = this.entries.toArray();
-    //     console.log(entriesArr);
-    //     let pos = index - range[0];
-    //     //remove highlighting from already highlighted entries
-    //     let i;
-    //     for(i = 0; i < this.highlightEntries.length; i++) {
-    //       this.renderer.removeClass(this.highlightEntries[i].nativeElement, "highlight");
-    //     }
-    //     //reset list of highlighted entries
-    //     this.highlightEntries = [];
-    //     this.highlightEntries.push(entriesArr[pos]);
-    //     //highlight the selected entry
-    //     this.renderer.addClass(entriesArr[pos].nativeElement, "highlight");
-    //   }, 0);
-
-    // });
-  }
-
-//  spatialSearch(geometry: any){
-
-//     var query = "{'$and':[{'name':'Landuse'},{'value.name':'dataset12042018'},{'value.loc': {$geoWithin: {'$geometry':"+JSON.stringify(geometry.geometry).replace(/"/g,'\'')+"}}}]}";
-//     console.log(query)
-//     let url = AppConfig.settings.aad.tenant+"/meta/v2/data?q="+encodeURI(query)+"&limit=100000&offset=0";
-//        //.set("Authorization", "Bearer " + currentUser.access_token)
-//     let head = new HttpHeaders()
-//     .set("Content-Type", "application/x-www-form-urlencoded");
-//     let options = {
-//       headers: head
-//     };
-// console.log("stuff1")
-//     this.http.get<any>(url, options).subscribe(responseData => console.log(responseData.result));
-//     /*.pipe(
-//      map((data) => {
-//        console.log("more")
-//        return data.result as Metadata[];
-//      }),
-//      catchError((e) => {
-//        console.log()
-//        return Observable.throw(new Error(e.message));
-//      })
-//    );*/
-//    console.log("stuff2")
-//    //return response;
-//   }
-
-}
-
-enum NameGroupMap {
-  Water_Quality_Site = "waterQualitySites",
-  Site = "sites",
-  Well = "wells"
-}
-
-enum GroupLabelMap {
-  waterQualitySites = "Water Quality Sites",
-  sites = "Sites",
-  wells = "Wells"
 }

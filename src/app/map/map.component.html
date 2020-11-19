@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="row">
   <div *ngIf="selectedMetadata" class="col-md-12 jumbotron jumbotron-fluid">
 
@@ -115,69 +116,13 @@
       </div>
     </div>
   </div>
+=======
+
+<div leaflet class="map pull-left"
+  leafletDraw
+  [leafletOptions]="mapOptions"
+  [leafletDrawOptions]="drawOptions"
+  (leafletMapReady)="onMapReady($event)">
+>>>>>>> a1f98f3ea30490b2af40614ca2d3fe66f7e49258
 </div>
 
-<div class="row">
-  <!--- <div class="col-md-7">
-      <div leaflet class="map pull-left"
-        leafletDraw
-        [leafletOptions]="options"
-        [leafletDrawOptions]="drawOptions"
-        (leafletDrawCreated)="onDrawCreated($event)"
-        (leafletMapReady)="onMapReady($event)" >
-      </div>
-    </div>-->
-    <div class="col-md-12">
-    <!-- <div class="grid">
-      <div class="bl">Color Legend</div>
-      <div class="ht">Cluster Size</div>
-      <div class="hl">Site Type</div>
-      <div class="s1">1-9</div>
-      <div class="s2">10-100</div>
-      <div class="s3">100+</div>
-      <div class="t1">Well</div>
-      <div class="t2">Site</div>
-      <div class="t3">Water Quality Site</div>
-
-      <div class="c1"><div class="color-circle color-1"></div></div>
-      <div class="c2"><div class="color-circle color-2"></div></div>
-      <div class="c3"><div class="color-circle color-3"></div></div>
-      <div class="c4"><div class="color-circle color-4"></div></div>
-      <div class="c5"><div class="color-circle color-5"></div></div>
-      <div class="c6"><div class="color-circle color-6"></div></div>
-      <div class="c7"><div class="color-circle color-7"></div></div>
-      <div class="c8"><div class="color-circle color-8"></div></div>
-      <div class="c9"><div class="color-circle color-9"></div></div>
-    </div> -->
-
-    <div *ngIf="metadata.length > 0">
-    <h5>Results {{filterData.length}}</h5>
-    <input class="form" type="text" (keyup)='tableSearch($event.target.value)' placeholder="Filter Results">
-    <div style="overflow: auto; height:500px;" class="table-responsive">
-    <table class="table">
-      <tr>
-          <th>Title</th>
-          <th>DOI</th>
-          <th>Files</th>
-      </tr>
-      <tr *ngFor="let metadatum of filterData">
-
-          <td width="40%">
-            <a href="#" class="btn btn-info btn-sm" (click)="selectDataDescriptor(metadatum)">View</a>
-            <span #entries>&nbsp;&nbsp;{{metadatum.value.title}}</span>
-          </td>
-          <td>
-            <span #entries><a href='http://doi.org/{{metadatum.value.doi}}'target='_blank'>{{metadatum.value.doi}}</a></span>
-          </td>
-          <td width="20%">
-            <div >
-                <span *ngFor="let link of metadatum._links.associationIds ">
-                  <a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
-                </span>
-            </div>
-          </td>
-        </tr>
-      </table>
-      </div>
-      </div>
-    </div>
