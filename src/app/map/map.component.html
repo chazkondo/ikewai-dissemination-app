@@ -21,7 +21,13 @@
 			<b>Format:</b>&nbsp;{{selectedMetadata.value.formats}}<br/>
       <span *ngIf="assoc_locations.length > 0"><b>Location(s):</b>&nbsp;
       <ul *ngFor="let assoc of assoc_locations">
-          <li *ngIf ="assoc.name == 'Site'">{{assoc.value.name}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
+        <div leaflet class="map pull-left col-md-8"
+          leafletDraw
+          [leafletOptions]="options"
+          [leafletDrawOptions]="drawOptions"
+          (leafletMapReady)="onMapReady($event)" >
+        </div>
+          <li *ngIf ="assoc.name == 'Site'">{{assoc.value.name.replace("?","’").replace("?","’").replace("?","’").replace("?","’")}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
           <li *ngIf ="assoc.name == 'Well'">{{assoc.value.well_name}}({{assoc.value.wid}})({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
           <li *ngIf ="assoc.name == 'Water_Quality_Site'">{{assoc.value.name}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
       </ul></span>

@@ -67,6 +67,8 @@ export class MapComponent implements OnInit, AfterViewInit {
     position: 'topleft',
     draw: {
        polyline: false,
+       rectangle: false,
+       polygon: false,
        circle: false,
        marker: false,
        circlemarker: false
@@ -81,10 +83,10 @@ export class MapComponent implements OnInit, AfterViewInit {
  };
 
   onMapReady(map: L.Map) {
-    this.metadata =[];
+    //this.metadata =[];
     this.map = map;
 
-    let legendControl: L.Control = new L.Control({position: "bottomleft"});
+    /*let legendControl: L.Control = new L.Control({position: "bottomleft"});
     legendControl.onAdd = (map) => {
       let legend = L.DomUtil.create("div", "legend");
       legend.innerHTML = '<div class="grid">'
@@ -105,7 +107,7 @@ export class MapComponent implements OnInit, AfterViewInit {
       return legend;
     }
     legendControl.addTo(this.map);
-
+    */
     let iconCreateFunction = (group: string): (cluster: any) => L.DivIcon => {
 
       return (cluster: any) => {
@@ -172,7 +174,7 @@ export class MapComponent implements OnInit, AfterViewInit {
   }
   selectDataDescriptor(data_descriptor){
     this.selectedMetadata = data_descriptor
-    let datastrm: QueryController = this.queryHandler.fetchAssociateMetadata(data_descriptor.associationIds)
+    let datastrm: QueryController = this.queryHandler.fetchAssociateMetadata(data_descriptor.uuid, data_descriptor.associationIds)
     datastrm.getQueryObserver().subscribe((data: any) => {
       data = data.data;
       //data;
@@ -182,6 +184,39 @@ export class MapComponent implements OnInit, AfterViewInit {
       this.selectedAssocMetadata = data;
       this.assoc_locations = []
       this.assoc_variables =[]
+      this.drawnItems.clearLayers();
+      let iconCreateFunction = (group: string): (cluster: any) => L.DivIcon => {
+
+        return (cluster: any) => {
+          let childCount = cluster.getChildCount();
+          let markerClass = "marker-cluster ";
+          let clusterSize = "marker-cluster-"
+          if(childCount < 10) {
+            clusterSize += "small";
+          }
+          else if(childCount < 100) {
+            clusterSize += "medium";
+          }
+          else {
+            clusterSize += "large";
+          }
+          markerClass += clusterSize + "-" + group;
+
+          return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>',
+          className: markerClass, iconSize: new L.Point(40, 40)});
+        }
+      };
+
+      this.dataGroups = {
+        sites: L.markerClusterGroup({iconCreateFunction: iconCreateFunction("sites")}),
+        wells: L.markerClusterGroup({iconCreateFunction: iconCreateFunction("wells")}),
+        waterQualitySites: L.markerClusterGroup({iconCreateFunction: iconCreateFunction("waterQualitySites")})
+      };
+      Object.keys(this.dataGroups).forEach((key) => {
+        let dataGroup = this.dataGroups[key];
+        dataGroup.clearLayers();
+      });
+
       let indices = Object.keys(data);
       let i: number;
       for(i = 0; i < indices.length; i++) {
@@ -189,6 +224,62 @@ export class MapComponent implements OnInit, AfterViewInit {
         let datum = data[index];
         if (datum.name == 'Site' || datum.name == 'Well' || datum.name == 'Water_Quality_Site'){
           this.assoc_locations.push(datum)
+          let group = NameGroupMap[datum.name];
+          let geojson = L.geoJSON(datum.value.loc, {
+            style: this.getStyleByGroup(group),
+            pointToLayer: (feature, latlng) => {
+              let icon = this.getIconByGroup(group);
+              return L.marker(latlng, {icon: icon});
+            },
+            onEachFeature: (feature, layer) => {
+              let header = L.DomUtil.create("h6")
+              let wrapper = L.DomUtil.create("div")
+              let details = L.DomUtil.create("div");
+              let download = L.DomUtil.create("div")
+              let goto = L.DomUtil.create("span", "entry-link");
+
+              //details.innerText = JSON.stringify(datum.value);
+              header.innerText=datum.name.replace(/_/g, ' ');
+              if(datum.name == "Water_Quality_Site"){
+                details.innerHTML = "<br/>Name: "+datum.value.name+"<br/>ID: "+datum.value.MonitoringLocationIdentifier+"<br/>Provider: "+datum.value.ProviderName+"<br/>"+datum.value.description+"<br/>Latitude: "+datum.value.latitude+"<br/>Longitude: "+datum.value.longitude+"<br/><a target='_blank' href='"+datum.value.siteUrl+"'>More Details</a>";
+                if(datum.value.resultCount > 0){
+                  download.innerHTML = "<br/><a class='btn btn-success' href='https://www.waterqualitydata.us/Result/search?siteid="+datum.value.MonitoringLocationIdentifier+"&mimeType=csv&zip=yes&sorted=no' target='_blank' > Download "+datum.value.resultCount+" Measurements</a></br>"
+                }
+              }
+              if(datum.name == "Well"){
+                details.innerHTML = "<br/>Name: "+datum.value.well_name+"<br/>ID: "+datum.value.wid+"<br/>Use: "+datum.value.use+"<br/>Driller: "+datum.value.driller+"<br/>Year Drilled: "+datum.value.yr_drilled+"<br/>Surveyor: "+datum.value.surveyor+"<br/>Casing Diameter: "+datum.value.casing_dia+"<br/>Depth: "+datum.value.well_depth+"<br/>Latitude: "+datum.value.latitude+"<br/>Longitude: "+datum.value.longitude;
+
+                let j:number;
+                for(j = 0; j < datum._links.associationIds.length; j++) {
+                  if(datum._links.associationIds[j].href.indexOf('ikewai-annotated')!== -1){
+                  //  download.innerHTML ='<a href="javascript:void(0);" class="btn btn-success" (click)="downloadClick(\''+datum._links.associationIds[j].href+'\')">Download '+datum._links.associationIds[j].href.split('/').slice(-1)[0]+'</a>'
+                  }
+                }
+              }
+              //goto.innerText = "Go to Entry";
+
+              let popup: L.Popup = new L.Popup();
+              wrapper.append(header)
+              wrapper.append(details);
+              wrapper.append(download);
+              wrapper.append(goto);
+
+              let linkDiv = wrapper.getElementsByClassName("entry-link");
+
+              let gotoWrapper = () => {
+                console.log("click");
+                //this.gotoEntry(index);
+              }
+              linkDiv[0].addEventListener("click", gotoWrapper);
+              popup.setContent(wrapper);
+              layer.bindPopup(popup);
+              if(this.dataGroups[group] != undefined) {
+                this.dataGroups[group].addLayer(layer);
+                console.log('adding Layer?')
+              }
+            }
+
+          });
         }
         if (datum.name == 'Variable'){
           this.assoc_variables.push(datum)
@@ -200,6 +291,7 @@ export class MapComponent implements OnInit, AfterViewInit {
 
     //this.selectedAssocMetadata = assoc_metadata
   }
+
 
   deselectDataDescriptor(){
     this.selectedMetadata = null;
@@ -213,6 +305,8 @@ export class MapComponent implements OnInit, AfterViewInit {
       })
 
   }
+
+
   createPostit(file_url): Observable<any>{
     let url = AppConfig.settings.aad.tenant + "/postits/v2/?url=" + encodeURI(file_url) + "&method=GET&lifetime=600&maxUses=1";
     let head = new HttpHeaders()
@@ -258,7 +352,9 @@ export class MapComponent implements OnInit, AfterViewInit {
     //this.queryHandler.initFilterListener(this.filters.filterMonitor);
     this.defaultFilterHandle = this.filters.registerFilter();
     this.initSearch();
-
+    this.assoc_metadata=[];
+    this.assoc_locations=[];
+    this.assoc_variables=[];
     //console.log(this.defaultFilterHandle);
     //this.defaultFilterSource = this.queryHandler.getFilterObserver(this.defaultFilterHandle);
     // this.defaultFilterSource.subscribe((data: Metadata[]) => {
