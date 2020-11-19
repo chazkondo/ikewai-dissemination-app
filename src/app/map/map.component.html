@@ -61,6 +61,8 @@
       <b>Data: </b><span *ngFor="let link of selectedMetadata._links.associationIds ">
         &nbsp;<a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
       </span>
+      <!--<span><a href="#" class="btn btn-secondary btn-sm" (click)="downloadSelectedMetadata('text')">Download Metadata Text</a></span>-->&nbsp;
+      <span><a href="#" class="btn btn-secondary btn-sm" (click)="downloadSelectedMetadata('JSON')">Download Metadata JSON</a> </span>
       <div style="float: right; padding-right:10px;">
         <a href="#" class="btn btn-info btn-sm" (click)="deselectDataDescriptor()">Close</a>
       </div>

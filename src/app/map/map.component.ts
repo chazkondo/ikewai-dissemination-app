@@ -174,6 +174,45 @@ export class MapComponent implements OnInit, AfterViewInit {
 
 
   }
+  downloadSelectedMetadata(format) {
+      var element = document.createElement('a');
+      var jsonobj = {}
+      jsonobj = this.selectedMetadata.value
+      jsonobj['uuid'] = this.selectedMetadata.uuid
+      jsonobj['files'] = []
+      this.selectedMetadata._links.associationIds.filter(assoc =>{
+        if (assoc.title == 'file'){
+          if (assoc.href.includes('ikewai-annotated-data')){
+            jsonobj['files'].push(assoc.href)
+          }
+        }
+      })
+      var location_array = []
+      this.assoc_locations.filter(location => {
+        location_array.push(location.value)
+      })
+      jsonobj['locations']=location_array
+      var var_array = []
+      this.assoc_variables.filter(variable => {
+        var_array.push(variable.value)
+      })
+      jsonobj['variables'] = var_array
+      if (format == 'JSON'){
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonobj, null, ' ')));
+        element.setAttribute('download', 'metadata.json');
+      }
+      else{
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonobj.toString()));
+        element.setAttribute('download', 'metadata.txt');
+      }
+
+      element.style.display = 'none';
+      document.body.appendChild(element);
+
+      element.click();
+
+      document.body.removeChild(element);
+  }
 
   selectDataDescriptor(data_descriptor){
     this.selectedMetadata = data_descriptor
