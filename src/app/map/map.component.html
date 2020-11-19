@@ -7,22 +7,42 @@
     <div class="container">
       <div class="pull-right">
       <h4>{{selectedMetadata.value.title}}</h4>
-      <h6>Unique 'Ike Wai URL: http://browse.ikewai.org?dd={{selectedMetadata.uuid}}</h6>  
-      <b>DOI: </b>&nbsp;{{selectedMetadata.value.doi}}<br/>
-      <b>Data Published:</b>&nbsp;{{selectedMetadata.value.gotDOIDate}}<br/>
-      <b>Start Date</b>&nbsp;{{selectedMetadata.value.start_datetime}} &nbsp; &nbsp;
-      <b>End Date</b>&nbsp;{{selectedMetadata.value.end_datetime}}<br/>
-      <b>Authors:</b>
-      <span *ngFor="let author of selectedMetadata.value.creators ">
-        {{author.first_name}} {{author.last_name}},
-      </span><br/>
-      <b>Subjects:</b>&nbsp;{{selectedMetadata.value.subjects}}<br/>
-      <b>License:</b>&nbsp;{{selectedMetadata.value.license_rights}}<br/>
-      <b>Data Type:</b>&nbsp;{{selectedMetadata.value.data_types}}<br/>
-			<b>Format:</b>&nbsp;{{selectedMetadata.value.formats}}<br/>
+      <i style="font-size:10pt;">Unique 'Ike Wai URL: <a href='http://browse.ikewai.org?dd={{selectedMetadata.uuid}}'>http://browse.ikewai.org?dd={{selectedMetadata.uuid}}</a></i>
+      <div class="table-responsive">
+      <table class="table">
+        <tr>
+          <td style='width:50%;'> <b>DOI: </b>&nbsp;<a href='http://doi.org/{{selectedMetadata.value.doi}}'target='_blank'>{{selectedMetadata.value.doi}}</a><br/></td>
+          <td><b>Data Published:</b>&nbsp;{{selectedMetadata.value.gotDOIDate}}<br/></td>
+        </tr>
+        <tr>
+          <td><b>Start Date</b>&nbsp;{{selectedMetadata.value.start_datetime}} &nbsp; &nbsp;</td>
+          <td><b>End Date</b>&nbsp;{{selectedMetadata.value.end_datetime}}<br/><td>
+        </tr>
+        <tr>
+          <td>  <b>Authors:</b>
+            <span *ngFor="let author of selectedMetadata.value.creators ">
+              {{author.first_name}} {{author.last_name}},
+            </span><br/>
+          </td>
+          <td><b>Subjects:</b>&nbsp;{{selectedMetadata.value.subjects}}<br/></td>
+        </tr>
+        <tr>
+          <td><b>License:</b>&nbsp;{{selectedMetadata.value.license_rights}}<br/></td>
+          <td><b>Data Type:</b>&nbsp;{{selectedMetadata.value.data_types}}<br/></td>
+        <tr>
+          <td><b>Format:</b>&nbsp;{{selectedMetadata.value.formats}}<br/></td>
+          <td>
+
+          <span *ngIf= "assoc_variables.length >0"><b>Variables:</b>&nbsp;
+          <ul *ngFor="let assoc of assoc_variables">
+              <li>{{assoc.value.variable_name}}{{assoc.value.units}}</li>
+          </ul></span></td>
+        </tr>
+        <tr>
+          <td>
       <span *ngIf="assoc_locations.length > 0"><b>Location(s):</b>&nbsp;
       <ul *ngFor="let assoc of assoc_locations">
-        <div leaflet class="map pull-left col-md-8"
+        <div leaflet class="map pull-left"
           leafletDraw
           [leafletOptions]="options"
           [leafletDrawOptions]="drawOptions"
@@ -32,12 +52,11 @@
           <li *ngIf ="assoc.name == 'Well'">{{assoc.value.well_name}}({{assoc.value.wid}})({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
           <li *ngIf ="assoc.name == 'Water_Quality_Site'">{{assoc.value.name}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
       </ul></span>
-      <span *ngIf= "assoc_variables.length >0"><b>Variables:</b>&nbsp;
-      <ul *ngFor="let assoc of assoc_variables">
-          <li>{{assoc.value.variable_name}}{{assoc.value.units}}</li>
-      </ul></span>
-      <b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/>
-
+          </td>
+          <td><b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/></td>
+          </tr>
+      </table>
+      </div>
       <b>Data: </b><span *ngFor="let link of selectedMetadata._links.associationIds ">
         &nbsp;<a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
       </span>
@@ -96,7 +115,7 @@
 
           <td width="40%">
             <a href="#" class="btn btn-info btn-sm" (click)="selectDataDescriptor(metadatum)">View</a>
-            <span #entries>{{metadatum.value.title}}</span>
+            <span #entries>&nbsp;&nbsp;{{metadatum.value.title}}</span>
           </td>
           <td>
             <span #entries><a href='http://doi.org/{{metadatum.value.doi}}'target='_blank'>{{metadatum.value.doi}}</a></span>
