@@ -50,12 +50,52 @@
       </ul></span>
           </td>
           <td>
-          <span><b>Variables:</b>&nbsp;
-          <ul *ngFor="let assoc of assoc_variables">
-              <li>{{assoc.value.variable_name}}{{assoc.value.units}}</li>
-          </ul></span></td>
+            <span><b>Variables:</b>&nbsp;
+              <!-- The Modal -->
+              <div *ngIf="show_var_modal && selectedVariable" id="varModal">
+                <!-- Modal content -->
+                <div class="modal-content">
+                  <div class="close" style="float: right; padding-left:95%;" (click)="closeVarInfo()">&times;</div>
+                  <div id="var-content px-md-5" style="padding:5px; ">
+                      <b>ID:</b>&nbsp;{{selectedVariable.value.id}}<br/>
+                      <b>Name:</b>&nbsp;{{selectedVariable.value.variable_name}}<br/>
+                      <b>Unit:</b>&nbsp;{{selectedVariable.value.unit}}<br/>
+                      <b>Sample Medium:</b>&nbsp;{{selectedVariable.value.samplem}}<br/>
+                      <b>Category:</b>&nbsp;{{selectedVariable.value.category}}<br/>
+                      <b>Value Type:</b>&nbsp;{{selectedVariable.value.value_type}}<br/>
+                      <b>Data Type:</b>&nbsp;{{selectedVariable.value.data_type}}<br/>
+                      <span *ngIf="selectedVariable != null && selectedVariable.value.speciation != null">
+                        <b>Speciation:</b>&nbsp;{{selectedVariable.value.speciation}}<br/>
+                      </span>
+                      <b>Description:</b>&nbsp;{{selectedVariable.value.description}}<br/>
+                  </div>
+                </div>
+
+              </div>
+            <div class="table-responsive">
+            <table *ngIf="assoc_variables.length > 0" class="table">
+              <tr>
+                <th>Name</th>
+                <th>Unit</th>
+                <th>Category</th>
+                <th>Medium</th>
+                <th>Action</th>
+              </tr>
+              <tr *ngFor="let assoc of assoc_variables" class="hover">
+                <td>{{assoc.value.variable_name}}</td>
+                <td>{{assoc.value.unit}}</td>
+                <td>{{assoc.value.category}}</td>
+                <td>{{assoc.value.samplem}}</td>
+                <td>
+                  <a href="#" class='btn-info btn-sm' (click)="showVariableInfo(assoc)">More...</a>
+                </td>
+              </tr>
+            </table></div>
+            </span>
+            </td>
           </tr>
       </table>
+
       </div>
       <b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/>
       <b>Data: </b><span *ngFor="let link of selectedMetadata._links.associationIds ">
@@ -71,6 +111,7 @@
     </div>
   </div>
 </div>
+
 <div class="row">
   <!--- <div class="col-md-7">
       <div leaflet class="map pull-left"

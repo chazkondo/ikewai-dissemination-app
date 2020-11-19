@@ -38,11 +38,14 @@ export class MapComponent implements OnInit, AfterViewInit {
   assoc_locations: Metadata[];
   assoc_variables: Metadata[];
   selectedAssocMetadata: Metadata[];
+  selectedVariable: Metadata;
+  show_var_modal: boolean;
   currentUser: User;
   result: Array<Object>;
 
   defaultFilterSource: Observable<Metadata[]>;
   defaultFilterHandle: FilterHandle;
+
 
   map: L.Map;
 
@@ -183,7 +186,7 @@ export class MapComponent implements OnInit, AfterViewInit {
       this.selectedMetadata._links.associationIds.filter(assoc =>{
         if (assoc.title == 'file'){
           if (assoc.href.includes('ikewai-annotated-data')){
-            jsonobj['files'].push(assoc.href)
+            jsonobj['files'].push(assoc.href.replace('media','download/public'))
           }
         }
       })
@@ -207,11 +210,24 @@ export class MapComponent implements OnInit, AfterViewInit {
       }
 
       element.style.display = 'none';
+      element.target = '_blank'
       document.body.appendChild(element);
 
       element.click();
 
       document.body.removeChild(element);
+  }
+
+  closeVarInfo(){
+    this.show_var_modal = false
+  }
+
+  showVariableInfo(new_var){
+    //var element = document.getElementById('var-content');
+    //element.innerHTML  = "hello"
+    //document.getElementById('varModal').hidden = false;
+    this.show_var_modal = true
+    this.selectedVariable = new_var
   }
 
   selectDataDescriptor(data_descriptor){
@@ -398,6 +414,7 @@ export class MapComponent implements OnInit, AfterViewInit {
     this.assoc_locations=[];
     this.assoc_variables=[];
     console.log(this.route.snapshot.queryParams['dd']);
+    this.show_var_modal = false;
     //console.log(this.defaultFilterHandle);
     //this.defaultFilterSource = this.queryHandler.getFilterObserver(this.defaultFilterHandle);
     // this.defaultFilterSource.subscribe((data: Metadata[]) => {
