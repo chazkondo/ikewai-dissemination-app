@@ -226,9 +226,9 @@ export class QueryHandlerService {
     return new QueryController(subjects);
   }
 
-  fetchAssociateMetadata(uuids: any[]): QueryController {
+  fetchAssociateMetadata(uuid: string, associate_uuids: any[]): QueryController {
     let subjects = [];
-    let query = '{"uuid":{"$in":'+JSON.stringify(uuids)+'}}';
+    let query = '{"$and":[{"name":{"$in":["Site","Well","Water_Quality_Site","RainfallStation","Variable"]}},{"$or":[{"uuid":{"$in":'+JSON.stringify(associate_uuids)+'}},{"associationIds":'+JSON.stringify(uuid)+'}]}]}';
     subjects.push(this.handleQuery(query));
     return new QueryController(subjects);
   }
