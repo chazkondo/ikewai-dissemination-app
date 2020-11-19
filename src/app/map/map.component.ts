@@ -31,10 +31,12 @@ export class MapComponent implements OnInit {
 
   map: L.Map
 
+
   constructor() {}
 
   ngOnInit(): void {
   }
+  
 
   onMapReady(map: L.Map): void {
     this.map = map
@@ -44,5 +46,4 @@ export class MapComponent implements OnInit {
   ngOnDestroy(): void {
     this.map.remove()
   }
-
 }

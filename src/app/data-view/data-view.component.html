@@ -35,32 +35,74 @@
         </tr>
         <tr>
           <td>
-      <span>
-        <b>Location(s):</b>&nbsp;
-        <app-map
-          [mapOptions]="options"
-          [drawOptions]="drawOptions"
-          [mapReadyHandler]="onMapReady.bind(this)"
-        ></app-map>
-        <ul *ngFor="let assoc of assoc_locations">
-            <li *ngIf ="assoc.name == 'Site'">{{assoc.value.name.replace("?","’").replace("?","’").replace("?","’").replace("?","’")}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
-            <li *ngIf ="assoc.name == 'Well'">{{assoc.value.well_name}}({{assoc.value.wid}})({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
-            <li *ngIf ="assoc.name == 'Water_Quality_Site'">{{assoc.value.name}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
-        </ul>
-      </span>
+            <span>
+              <b>Location(s):</b>&nbsp;
+              <app-map
+                [mapOptions]="options"
+                [drawOptions]="drawOptions"
+                [mapReadyHandler]="onMapReady.bind(this)"
+              ></app-map>
+              <ul *ngFor="let assoc of assoc_locations">
+                  <li *ngIf ="assoc.name == 'Site'">{{assoc.value.name.replace("?","’").replace("?","’").replace("?","’").replace("?","’")}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
+                  <li *ngIf ="assoc.name == 'Well'">{{assoc.value.well_name}}({{assoc.value.wid}})({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
+                  <li *ngIf ="assoc.name == 'Water_Quality_Site'">{{assoc.value.name}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
+              </ul>
+            </span>
           </td>
           <td>
-          <span><b>Variables:</b>&nbsp;
-          <ul *ngFor="let assoc of assoc_variables">
-              <li>{{assoc.value.variable_name}}{{assoc.value.units}}</li>
-          </ul></span></td>
+            <span><b>Variables:</b>&nbsp;
+              <!-- The Modal -->
+              <div *ngIf="show_var_modal && selectedVariable" id="varModal">
+                <!-- Modal content -->
+                <div class="modal-content">
+                  <div class="close" style="float: right; padding-left:95%;" (click)="closeVarInfo()">&times;</div>
+                  <div id="var-content px-md-5" style="padding:5px; ">
+                      <b>ID:</b>&nbsp;{{selectedVariable.value.id}}<br/>
+                      <b>Name:</b>&nbsp;{{selectedVariable.value.variable_name}}<br/>
+                      <b>Unit:</b>&nbsp;{{selectedVariable.value.unit}}<br/>
+                      <b>Sample Medium:</b>&nbsp;{{selectedVariable.value.samplem}}<br/>
+                      <b>Category:</b>&nbsp;{{selectedVariable.value.category}}<br/>
+                      <b>Value Type:</b>&nbsp;{{selectedVariable.value.value_type}}<br/>
+                      <b>Data Type:</b>&nbsp;{{selectedVariable.value.data_type}}<br/>
+                      <span *ngIf="selectedVariable != null && selectedVariable.value.speciation != null">
+                        <b>Speciation:</b>&nbsp;{{selectedVariable.value.speciation}}<br/>
+                      </span>
+                      <b>Description:</b>&nbsp;{{selectedVariable.value.description}}<br/>
+                  </div>
+                </div>
+
+              </div>
+            <div class="table-responsive">
+            <table *ngIf="assoc_variables.length > 0" class="table">
+              <tr>
+                <th>Name</th>
+                <th>Unit</th>
+                <th>Category</th>
+                <th>Medium</th>
+                <th>Action</th>
+              </tr>
+              <tr *ngFor="let assoc of assoc_variables" class="hover">
+                <td>{{assoc.value.variable_name}}</td>
+                <td>{{assoc.value.unit}}</td>
+                <td>{{assoc.value.category}}</td>
+                <td>{{assoc.value.samplem}}</td>
+                <td>
+                  <a href="#" class='btn-info btn-sm' (click)="showVariableInfo(assoc)">More...</a>
+                </td>
+              </tr>
+            </table></div>
+            </span>
+            </td>
           </tr>
       </table>
+
       </div>
       <b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/>
       <b>Data: </b><span *ngFor="let link of selectedMetadata._links.associationIds ">
         &nbsp;<a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
       </span>
+      <!--<span><a href="#" class="btn btn-secondary btn-sm" (click)="downloadSelectedMetadata('text')">Download Metadata Text</a></span>-->&nbsp;
+      <span><a href="#" class="btn btn-secondary btn-sm" (click)="downloadSelectedMetadata('JSON')">Download Metadata JSON</a> </span>
       <div style="float: right; padding-right:10px;">
         <a href="#" class="btn btn-info btn-sm" (click)="deselectDataDescriptor()">Close</a>
       </div>
@@ -69,6 +111,7 @@
     </div>
   </div>
 </div>
+
 <div class="row">
   <!--- <div class="col-md-7">
       <div leaflet class="map pull-left"
@@ -79,33 +122,33 @@
         (leafletMapReady)="onMapReady($event)" >
       </div>
     </div>-->
-    <div class="col-md-12">
-    <!-- <div class="grid">
-      <div class="bl">Color Legend</div>
-      <div class="ht">Cluster Size</div>
-      <div class="hl">Site Type</div>
-      <div class="s1">1-9</div>
-      <div class="s2">10-100</div>
-      <div class="s3">100+</div>
-      <div class="t1">Well</div>
-      <div class="t2">Site</div>
-      <div class="t3">Water Quality Site</div>
+  <div class="col-md-12">
+  <!-- <div class="grid">
+    <div class="bl">Color Legend</div>
+    <div class="ht">Cluster Size</div>
+    <div class="hl">Site Type</div>
+    <div class="s1">1-9</div>
+    <div class="s2">10-100</div>
+    <div class="s3">100+</div>
+    <div class="t1">Well</div>
+    <div class="t2">Site</div>
+    <div class="t3">Water Quality Site</div>
 
-      <div class="c1"><div class="color-circle color-1"></div></div>
-      <div class="c2"><div class="color-circle color-2"></div></div>
-      <div class="c3"><div class="color-circle color-3"></div></div>
-      <div class="c4"><div class="color-circle color-4"></div></div>
-      <div class="c5"><div class="color-circle color-5"></div></div>
-      <div class="c6"><div class="color-circle color-6"></div></div>
-      <div class="c7"><div class="color-circle color-7"></div></div>
-      <div class="c8"><div class="color-circle color-8"></div></div>
-      <div class="c9"><div class="color-circle color-9"></div></div>
-    </div> -->
+    <div class="c1"><div class="color-circle color-1"></div></div>
+    <div class="c2"><div class="color-circle color-2"></div></div>
+    <div class="c3"><div class="color-circle color-3"></div></div>
+    <div class="c4"><div class="color-circle color-4"></div></div>
+    <div class="c5"><div class="color-circle color-5"></div></div>
+    <div class="c6"><div class="color-circle color-6"></div></div>
+    <div class="c7"><div class="color-circle color-7"></div></div>
+    <div class="c8"><div class="color-circle color-8"></div></div>
+    <div class="c9"><div class="color-circle color-9"></div></div>
+  </div> -->
 
-    <div *ngIf="metadata.length > 0">
-    <h5>Results {{filterData.length}}</h5>
-    <input class="form" type="text" (keyup)='tableSearch($event.target.value)' placeholder="Filter Results">
-    <div style="overflow: auto; height:500px;" class="table-responsive">
+  <div *ngIf="metadata.length > 0">
+  <h5>Results {{filterData.length}}</h5>
+  <input class="form" type="text" (keyup)='tableSearch($event.target.value)' placeholder="Filter Results">
+  <div style="overflow: auto; height:500px;" class="table-responsive">
     <table class="table">
       <tr>
           <th>Title</th>
@@ -130,6 +173,6 @@
           </td>
         </tr>
       </table>
-      </div>
-      </div>
     </div>
+  </div>
+</div>
