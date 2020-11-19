@@ -16,6 +16,7 @@ import { QueryHandlerService, QueryController, QueryResponse } from '../_service
 import { FilterHandle, FilterManagerService, Filter, FilterMode } from '../_services/filter-manager.service';
 import { mapToExpression } from '@angular/compiler/src/render3/view/util';
 import { HttpClient, HttpHeaders, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
   selector: 'app-map',
@@ -81,6 +82,7 @@ export class MapComponent implements OnInit, AfterViewInit {
  controlOptions = {
   attributionControl: false
  };
+
 
   onMapReady(map: L.Map) {
     //this.metadata =[];
@@ -167,11 +169,12 @@ export class MapComponent implements OnInit, AfterViewInit {
   }
 
 
-  constructor(private renderer: Renderer2, private queryHandler: QueryHandlerService, private filters: FilterManagerService, private http: HttpClient) {
+  constructor(private renderer: Renderer2, private queryHandler: QueryHandlerService, private filters: FilterManagerService, private http: HttpClient,private route: ActivatedRoute) {
     //currentUser: localStorage.getItem('currentUser');
 
 
   }
+
   selectDataDescriptor(data_descriptor){
     this.selectedMetadata = data_descriptor
     let datastrm: QueryController = this.queryHandler.fetchAssociateMetadata(data_descriptor.uuid, data_descriptor.associationIds)
@@ -355,6 +358,7 @@ export class MapComponent implements OnInit, AfterViewInit {
     this.assoc_metadata=[];
     this.assoc_locations=[];
     this.assoc_variables=[];
+    console.log(this.route.snapshot.queryParams['dd']);
     //console.log(this.defaultFilterHandle);
     //this.defaultFilterSource = this.queryHandler.getFilterObserver(this.defaultFilterHandle);
     // this.defaultFilterSource.subscribe((data: Metadata[]) => {
@@ -407,6 +411,9 @@ export class MapComponent implements OnInit, AfterViewInit {
         let datum = data[index];
       //  if((datum.name=="Water_Quality_Site" && datum.value.resultCount > 0)) || datum._links.associationIds.length > 0){
           this.metadata.push(datum)
+          if (this.route.snapshot.queryParams['dd'] == datum.uuid){
+            this.selectDataDescriptor(datum)
+          }
           let group = NameGroupMap[datum.name];
           //console.log(datum.value.loc);
           let geojson = L.geoJSON(datum.value.loc, {
