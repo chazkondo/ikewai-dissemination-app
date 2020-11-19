@@ -31,32 +31,33 @@
           <td><b>Data Type:</b>&nbsp;{{selectedMetadata.value.data_types}}<br/></td>
         <tr>
           <td><b>Format:</b>&nbsp;{{selectedMetadata.value.formats}}<br/></td>
-          <td>
-
-          <span *ngIf= "assoc_variables.length >0"><b>Variables:</b>&nbsp;
-          <ul *ngFor="let assoc of assoc_variables">
-              <li>{{assoc.value.variable_name}}{{assoc.value.units}}</li>
-          </ul></span></td>
+          <td></td>
         </tr>
         <tr>
           <td>
-      <span *ngIf="assoc_locations.length > 0"><b>Location(s):</b>&nbsp;
-      <ul *ngFor="let assoc of assoc_locations">
+      <span><b>Location(s):</b>&nbsp;
         <div leaflet class="map pull-left"
           leafletDraw
           [leafletOptions]="options"
           [leafletDrawOptions]="drawOptions"
           (leafletMapReady)="onMapReady($event)" >
         </div>
+      <ul *ngFor="let assoc of assoc_locations">
+
           <li *ngIf ="assoc.name == 'Site'">{{assoc.value.name.replace("?","’").replace("?","’").replace("?","’").replace("?","’")}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
           <li *ngIf ="assoc.name == 'Well'">{{assoc.value.well_name}}({{assoc.value.wid}})({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
           <li *ngIf ="assoc.name == 'Water_Quality_Site'">{{assoc.value.name}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
       </ul></span>
           </td>
-          <td><b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/></td>
+          <td>
+          <span><b>Variables:</b>&nbsp;
+          <ul *ngFor="let assoc of assoc_variables">
+              <li>{{assoc.value.variable_name}}{{assoc.value.units}}</li>
+          </ul></span></td>
           </tr>
       </table>
       </div>
+      <b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/>
       <b>Data: </b><span *ngFor="let link of selectedMetadata._links.associationIds ">
         &nbsp;<a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
       </span>
