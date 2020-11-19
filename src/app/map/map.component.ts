@@ -181,6 +181,8 @@ export class MapComponent implements OnInit, AfterViewInit {
       var element = document.createElement('a');
       var jsonobj = {}
       jsonobj = this.selectedMetadata.value
+      jsonobj['@context']="https://schema.org/"
+      jsonobj['@type'] = "Dataset"
       jsonobj['uuid'] = this.selectedMetadata.uuid
       jsonobj['files'] = []
       this.selectedMetadata._links.associationIds.filter(assoc =>{
@@ -200,6 +202,16 @@ export class MapComponent implements OnInit, AfterViewInit {
         var_array.push(variable.value)
       })
       jsonobj['variables'] = var_array
+
+      delete jsonobj["stagedToIkewai"]
+      delete jsonobj["rejectedFromIkewai"]
+      delete jsonobj["stagedToHydroshare"]
+      delete jsonobj["rejectedFromHydroshare"]
+      delete jsonobj["pushedToHydroshare"]
+      delete jsonobj["hasDOI"]
+      delete jsonobj["pushedToIkewai"]
+
+
       if (format == 'JSON'){
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(jsonobj, null, ' ')));
         element.setAttribute('download', 'metadata.json');

@@ -1,10 +1,11 @@
 <div class="row">
   <div *ngIf="selectedMetadata" class="col-md-12 jumbotron jumbotron-fluid">
-    <div style="float: right; padding-right:10px;">
-      <a href="#" class=" btn btn-info btn-sm" (click)="deselectDataDescriptor()">X</a>
-    </div>
+
 
     <div class="container">
+      <div style="float: right; padding-right:10px;">
+        <span href="#" class=" btn btn-info btn-sm" (click)="deselectDataDescriptor()">X</span>
+      </div>
       <div class="pull-right">
       <h4>{{selectedMetadata.value.title}}</h4>
       <i style="font-size:10pt;">Unique 'Ike Wai URL: <a href='http://ikewai.org/ike-wai/research-workbench/browse-data?dd={{selectedMetadata.uuid}}'>http://ikewai.org/ike-wai/research-workbench/browse-data?dd={{selectedMetadata.uuid}}</a></i>
@@ -12,26 +13,30 @@
       <table class="table">
         <tr>
           <td style='width:50%;'> <b>DOI: </b>&nbsp;<a href='http://doi.org/{{selectedMetadata.value.doi}}'target='_blank'>{{selectedMetadata.value.doi}}</a><br/></td>
-          <td><b>Data Published:</b>&nbsp;{{selectedMetadata.value.gotDOIDate}}<br/></td>
+          <td><b>Data Published:</b>&nbsp;{{selectedMetadata.value.gotDOIDate.split('T')[0]}}<br/></td>
         </tr>
         <tr>
           <td><b>Start Date</b>&nbsp;{{selectedMetadata.value.start_datetime}} &nbsp; &nbsp;</td>
           <td><b>End Date</b>&nbsp;{{selectedMetadata.value.end_datetime}}<br/><td>
         </tr>
         <tr>
-          <td>  <b>Authors:</b>
+          <td>  <b>Authors:&nbsp;</b>
             <span *ngFor="let author of selectedMetadata.value.creators ">
-              {{author.first_name}} {{author.last_name}},
+              <a href="mailto:{{author.email}}">{{author.first_name}} {{author.last_name}}</a>,
             </span><br/>
           </td>
-          <td><b>Subjects:</b>&nbsp;{{selectedMetadata.value.subjects}}<br/></td>
+          <td>  <b>Organizations:&nbsp;</b>
+            <span *ngFor="let org of selectedMetadata.value.organizations ">
+              <a href="{{org.url}}">{{org.name}}- {{org.address}} [{{org.phone}}]</a>,
+            </span><br/>
+          </td>
         </tr>
         <tr>
           <td><b>License:</b>&nbsp;{{selectedMetadata.value.license_rights}}<br/></td>
           <td><b>Data Type:</b>&nbsp;{{selectedMetadata.value.data_types}}<br/></td>
         <tr>
           <td><b>Format:</b>&nbsp;{{selectedMetadata.value.formats}}<br/></td>
-          <td></td>
+          <td><b>Subjects:</b>&nbsp;{{selectedMetadata.value.subjects}}<br/></td>
         </tr>
         <tr>
           <td>
@@ -87,7 +92,7 @@
                 <td>{{assoc.value.category}}</td>
                 <td>{{assoc.value.samplem}}</td>
                 <td>
-                  <a href="#" class='btn-info btn-sm' (click)="showVariableInfo(assoc)">More...</a>
+                  <span class='btn btn-info btn-sm' (click)="showVariableInfo(assoc)">More...</span>
                 </td>
               </tr>
             </table></div>
@@ -97,14 +102,14 @@
       </table>
 
       </div>
-      <b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/>
+      <b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/><br/>
       <b>Data: </b><span *ngFor="let link of selectedMetadata._links.associationIds ">
-        &nbsp;<a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
+        &nbsp;<span  *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</span>
       </span>
       <!--<span><a href="#" class="btn btn-secondary btn-sm" (click)="downloadSelectedMetadata('text')">Download Metadata Text</a></span>-->&nbsp;
-      <span><a href="#" class="btn btn-secondary btn-sm" (click)="downloadSelectedMetadata('JSON')">Download Metadata JSON</a> </span>
+      <span class="btn btn-secondary btn-sm" (click)="downloadSelectedMetadata('JSON')">Download Metadata JSON</span>
       <div style="float: right; padding-right:10px;">
-        <a href="#" class="btn btn-info btn-sm" (click)="deselectDataDescriptor()">Close</a>
+        <span class="btn btn-info btn-sm" (click)="deselectDataDescriptor()">Close</span>
       </div>
       <br/><br/>
       </div>
