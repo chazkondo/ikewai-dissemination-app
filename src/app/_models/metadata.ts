@@ -3,4 +3,5 @@ export class Metadata {
   value: any;
   name: string;
   associationIds: string[];
+  _links: any;
 }

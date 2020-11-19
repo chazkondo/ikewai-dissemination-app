@@ -114,7 +114,7 @@ export class QueryHandlerService {
         }
       });
 
-      offset += limit;
+      offset += <number>limit;
 
       rampState = ramp.next();
       limit = rampState.value;
@@ -227,6 +227,7 @@ export class QueryHandlerService {
   }
 
   fetchAssociateMetadata(uuid: string, associate_uuids: any[]): QueryController {
+    console.log(uuid, associate_uuids);
     let subjects = [];
     let query = '{"$and":[{"name":{"$in":["Site","Well","Water_Quality_Site","RainfallStation","Variable"]}},{"$or":[{"uuid":{"$in":'+JSON.stringify(associate_uuids)+'}},{"associationIds":'+JSON.stringify(uuid)+'}]}]}';
     subjects.push(this.handleQuery(query));
@@ -235,8 +236,10 @@ export class QueryHandlerService {
 
   //deal with case where same query running multiple times before complete
   private handleQuery(query: string): BehaviorSubject<QueryResponse> {
+    console.log(query);
     let dataStream = new BehaviorSubject<QueryResponse>({status: null, data: []});
     let stored: DataRange<Metadata> = <DataRange<Metadata>>this.cache.fetchData(query);
+    console.log(stored);
     let offset;
     let complete;
     if(stored == null) {
@@ -283,6 +286,7 @@ export class QueryHandlerService {
 
       //mirror dataController's data to this instance's dataStream
       let controllerSub = dataController.data.subscribe((data: QueryResponse) => {
+        console.log(data);
         dataStream.next(data);
       }, (error: any) => {
         complete = true;
