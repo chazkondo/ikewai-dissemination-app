@@ -264,6 +264,8 @@ export class QueryHandlerService {
         },
         data: stored.data
       }
+      console.log(response);
+      console.log("push data");
       dataStream.next(response);
     }
 
@@ -287,6 +289,7 @@ export class QueryHandlerService {
       //mirror dataController's data to this instance's dataStream
       let controllerSub = dataController.data.subscribe((data: QueryResponse) => {
         console.log(data);
+        console.log("push data");
         dataStream.next(data);
       }, (error: any) => {
         complete = true;
@@ -485,16 +488,17 @@ interface QuerySubjectMap {
 
 export class QueryController {
   private querySubjects: BehaviorSubject<QueryResponse>[];
-  private queryOutput: Subject<QueryResponse>;
+  private queryOutput: BehaviorSubject<QueryResponse>;
 
   constructor(querySubjects: BehaviorSubject<QueryResponse>[]) {
     this.querySubjects = querySubjects;
-    this.queryOutput = new Subject<QueryResponse>();
+    this.queryOutput = new BehaviorSubject<QueryResponse>(null);
     let completed = 0;
     let loadedResults = 0
     let i;
     for(i = 0; i < querySubjects.length; i++) {
       querySubjects[i].subscribe((response: QueryResponse) => {
+        console.log("data in controller");
         //ignore initial value pushed if no cache data
         if(response.status != null) {
           if(response.data != null) {
@@ -519,6 +523,7 @@ export class QueryController {
           if(completed == querySubjects.length) {
             outStatus.finished = true;
           }
+          console.log(outResponse);
           this.queryOutput.next(outResponse);
           //check if failed and cancel query if it did (stop if any part of query fails)
           if(response.status.error) {
