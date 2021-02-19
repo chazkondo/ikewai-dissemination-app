@@ -1,14 +1,38 @@
-# NgAgaveSpatialApp
+# Browse Application
+Ike Wai published data browser application in Angular.
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.1.3.
+## Development with Docker
 
-This is an template angular application for authenticating to an Agave Tenant via an Agave Nodejs Login service (https://github.com/UH-CI/agave-login-api). And then exposing spatial search for Agave Tenants that have have "value.loc" field with spatial indexing setup.
+Build
 
-To configure this application to use your Nodejs Agave Login service you can copy the src/assets/config/config.deploy.json and save it as config.dev.json and modify it for you development environment.
+```
+docker build -t ikebrowse .
+```
 
-## Development server
+Then you can run using:
+```
+docker run -p 4200:4200 --name browse ikebrowse ng serve --host=0.0.0.0
+```
+note the serve command and "host" parameter
+
+If you want to serve latest code repo without rebuilding you can use something like:
+
+```
+docker run -p 4200:4200 --name browse -v fullpath/to/src:/app/src ikebrowse ng serve --host=0.0.0.0
+```
+
+for production build you can createa  "dist" directory and mount it in the container and build:
+```
+docker run -p 4200:4200 --name browse -v fullpath/to/src:/app/src -v fullpath/to/dist:/app/dist ikebrowse ng build --prod
+```
+
+
+## Development server without Docker
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+
+
+
 
 ## Code scaffolding
 

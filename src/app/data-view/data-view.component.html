@@ -95,9 +95,8 @@
             </td>
           </tr>
       </table>
-
       </div>
-      <b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/>
+      <b>Description</b>&nbsp;{{selectedMetadata.value.description}}<br/><br/>
       <b>Data: </b><span *ngFor="let link of selectedMetadata._links.associationIds ">
         &nbsp;<a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
       </span>
