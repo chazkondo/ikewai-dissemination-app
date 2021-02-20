@@ -487,60 +487,55 @@ interface QuerySubjectMap {
 }
 
 export class QueryController {
-  private querySubjects: BehaviorSubject<QueryResponse>[];
-  private queryOutput: BehaviorSubject<QueryResponse>;
+  private querySubjects: Subject<QueryResponse>[];
+  private queryOutput: Subject<QueryResponse>;
 
-  constructor(querySubjects: BehaviorSubject<QueryResponse>[]) {
+  constructor(querySubjects: Subject<QueryResponse>[]) {
     this.querySubjects = querySubjects;
-    this.queryOutput = new BehaviorSubject<QueryResponse>(null);
+    this.queryOutput = new Subject<QueryResponse>();
     let completed = 0;
     let loadedResults = 0
-    let i;
-    for(i = 0; i < querySubjects.length; i++) {
-      querySubjects[i].subscribe((response: QueryResponse) => {
-        console.log("data in controller");
-        //ignore initial value pushed if no cache data
-        if(response.status != null) {
-          if(response.data != null) {
-            loadedResults += response.data.length;
-          }
-          let outStatus: RequestStatus = {
-            status: response.status.status,
-            error: response.status.error,
-            message: response.status.message,
-            loadedResults: loadedResults,
-            finished: false
-          };
-          let outResponse: QueryResponse = {
-            status: outStatus,
-            data: response.data
-          };
-
-          if(response.status.finished) {
-            completed++;
-          }
-          //if all completed set query status to finished
-          if(completed == querySubjects.length) {
-            outStatus.finished = true;
-          }
-          console.log(outResponse);
-          this.queryOutput.next(outResponse);
-          //check if failed and cancel query if it did (stop if any part of query fails)
-          if(response.status.error) {
-            this.cancel();
-          }
+    merge(...querySubjects).subscribe((response: QueryResponse) => {
+      console.log("data in controller");
+      //ignore initial value pushed if no cache data
+      if(response.status != null) {
+        if(response.data != null) {
+          loadedResults += response.data.length;
         }
-      }, () => {
-        //something went wrong, throw error in output and cancel query
-        this.queryOutput.error("An error has occurred while retreiving data");
-        //remove this subscription from subscription list since already completed (stop cleanup from being performed on cancel)
-        this.querySubjects[i] = null;
-        this.cancel();
-      }, () => {
-        //remove this subscription from subscription list since already completed (stop cleanup from being performed on cancel)
-        this.querySubjects[i] = null;
-      });
-    }
+        let outStatus: RequestStatus = {
+          status: response.status.status,
+          error: response.status.error,
+          message: response.status.message,
+          loadedResults: loadedResults,
+          finished: false
+        };
+        let outResponse: QueryResponse = {
+          status: outStatus,
+          data: response.data
+        };
+
+        if(response.status.finished) {
+          completed++;
+        }
+        //if all completed set query status to finished
+        if(completed == querySubjects.length) {
+          outStatus.finished = true;
+        }
+        console.log(outResponse);
+        this.queryOutput.next(outResponse);
+        //check if failed and cancel query if it did (stop if any part of query fails)
+        if(response.status.error) {
+          this.cancel();
+        }
+      }
+    }, () => {
+      //something went wrong, throw error in output and cancel query
+      this.queryOutput.error("An error has occurred while retreiving data");
+      this.cancel();
+    }, () => {
+      //complete output stream
+      this.queryOutput.complete();
+    });
   }
 
   getQueryObserver(): Observable<QueryResponse> {

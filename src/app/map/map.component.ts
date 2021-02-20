@@ -40,6 +40,9 @@ export class MapComponent implements OnInit {
 
   onMapReady(map: L.Map): void {
     this.map = map
+    map.on("resize", () => {
+      map.invalidateSize(true)
+    });
     this.mapReadyHandler(map);
   }
 

@@ -88,10 +88,9 @@ export class DataViewComponent implements OnInit {
 
 
   onMapReady(map: L.Map) {
+    
     this.mapLoaded = true;
-    setTimeout(() => {
-      map.invalidateSize(true)
-    }, 0);
+    
   
     //this.metadata =[];
     this.map = map;
@@ -119,8 +118,8 @@ export class DataViewComponent implements OnInit {
     legendControl.addTo(this.map);
     */
     let iconCreateFunction = (group: string): (cluster: any) => L.DivIcon => {
-
       return (cluster: any) => {
+        console.log(cluster);
         let childCount = cluster.getChildCount();
         let markerClass = "marker-cluster ";
         let clusterSize = "marker-cluster-"
@@ -134,16 +133,28 @@ export class DataViewComponent implements OnInit {
           clusterSize += "large";
         }
         markerClass += clusterSize + "-" + group;
-
-        return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>',
-        className: markerClass, iconSize: new L.Point(40, 40)});
+        return new L.DivIcon({
+          html: '<div><span>' + childCount + '</span></div>',
+          className: markerClass,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16]
+        });
       }
     };
 
     this.dataGroups = {
-      sites: L.markerClusterGroup({iconCreateFunction: iconCreateFunction("sites")}),
-      wells: L.markerClusterGroup({iconCreateFunction: iconCreateFunction("wells")}),
-      waterQualitySites: L.markerClusterGroup({iconCreateFunction: iconCreateFunction("waterQualitySites")})
+      sites: L.markerClusterGroup({
+        singleMarkerMode: false,
+        iconCreateFunction: iconCreateFunction("sites")
+      }),
+      wells: L.markerClusterGroup({
+        singleMarkerMode: false,
+        iconCreateFunction: iconCreateFunction("wells")
+      }),
+      waterQualitySites: L.markerClusterGroup({
+        singleMarkerMode: false,
+        iconCreateFunction: iconCreateFunction("waterQualitySites")
+      })
     };
 
     let controlGroups: any = {};
@@ -175,13 +186,46 @@ export class DataViewComponent implements OnInit {
     //   }
     // });
 
+    let bounds = null;
+    let cancelMove = false;
+    let cancelMoveF = () => {
+      cancelMove = true;
+      map.off("zoomstart", cancelMoveF);
+      map.off("movestart", cancelMoveF);
+    }
+    map.on("zoomstart", cancelMoveF);
+    map.on("movestart", cancelMoveF);
     this.datastream.subscribe((datum: Metadata) => {
+      console.log(datum);
       console.log("got data from stream!");
-      this.handleMetadata(datum);
+      let geojson = this.handleMetadata(datum);
+      if(geojson !== null) {
+        if(bounds) {
+          bounds.extend(geojson.getBounds());
+        }
+        else {
+          bounds = geojson.getBounds();
+        }
+        
+      }
+    }, () => {}, () => {
+      if(bounds && !cancelMove) {
+        this.map.flyToBounds(bounds);
+      }
+      
     });
     //push all preloaded data to the main datastream for handling
     this.datastreamPreload.subscribe((metadata: Metadata) => {
-      this.datastream.next(metadata);
+      console.log(metadata);
+      //datastream was completed during preload if null tail, complete datastream
+      if(metadata === null) {
+        this.datastream.complete();
+      }
+      //otherwise push next item
+      else {
+        this.datastream.next(metadata);
+      }
+      
     });
     //reset preload datastream
     this.datastreamPreload.complete();
@@ -189,70 +233,72 @@ export class DataViewComponent implements OnInit {
   }
 
 
-  handleMetadata(datum: Metadata) {
-    console.log(datum);
-    if (datum.name == 'Site' || datum.name == 'Well' || datum.name == 'Water_Quality_Site') {
+  handleMetadata(datum: Metadata): L.GeoJSON {
+    let geojson: L.GeoJSON = null;
+    if(datum.name == 'Site' || datum.name == 'Well' || datum.name == 'Water_Quality_Site') {
       this.assoc_locations.push(datum)
       let group = NameGroupMap[datum.name];
-      let geojson = L.geoJSON(datum.value.loc, {
+      geojson = L.geoJSON(datum.value.loc, {
         style: this.getStyleByGroup(group),
         pointToLayer: (feature, latlng) => {
           let icon = this.getIconByGroup(group);
           return L.marker(latlng, {icon: icon});
         },
         onEachFeature: (feature, layer) => {
-          let header = L.DomUtil.create("h6");
-          let wrapper = L.DomUtil.create("div");
-          let details = L.DomUtil.create("div");
-          let download = L.DomUtil.create("div");
-          let goto = L.DomUtil.create("span", "entry-link");
+          // console.log(feature);
+          // let header = L.DomUtil.create("h6");
+          // let wrapper = L.DomUtil.create("div");
+          // let details = L.DomUtil.create("div");
+          // let download = L.DomUtil.create("div");
+          // let goto = L.DomUtil.create("span", "entry-link");
 
-          //details.innerText = JSON.stringify(datum.value);
-          header.innerText=datum.name.replace(/_/g, ' ');
-          if(datum.name == "Water_Quality_Site"){
-            details.innerHTML = "<br/>Name: "+datum.value.name+"<br/>ID: "+datum.value.MonitoringLocationIdentifier+"<br/>Provider: "+datum.value.ProviderName+"<br/>"+datum.value.description+"<br/>Latitude: "+datum.value.latitude+"<br/>Longitude: "+datum.value.longitude+"<br/><a target='_blank' href='"+datum.value.siteUrl+"'>More Details</a>";
-            if(datum.value.resultCount > 0){
-              download.innerHTML = "<br/><a class='btn btn-success' href='https://www.waterqualitydata.us/Result/search?siteid="+datum.value.MonitoringLocationIdentifier+"&mimeType=csv&zip=yes&sorted=no' target='_blank' > Download "+datum.value.resultCount+" Measurements</a></br>"
-            }
-          }
-          if(datum.name == "Well"){
-            details.innerHTML = "<br/>Name: "+datum.value.well_name+"<br/>ID: "+datum.value.wid+"<br/>Use: "+datum.value.use+"<br/>Driller: "+datum.value.driller+"<br/>Year Drilled: "+datum.value.yr_drilled+"<br/>Surveyor: "+datum.value.surveyor+"<br/>Casing Diameter: "+datum.value.casing_dia+"<br/>Depth: "+datum.value.well_depth+"<br/>Latitude: "+datum.value.latitude+"<br/>Longitude: "+datum.value.longitude;
+          // //details.innerText = JSON.stringify(datum.value);
+          // header.innerText=datum.name.replace(/_/g, ' ');
+          // if(datum.name == "Water_Quality_Site") {
+          //   details.innerHTML = "<br/>Name: "+datum.value.name+"<br/>ID: "+datum.value.MonitoringLocationIdentifier+"<br/>Provider: "+datum.value.ProviderName+"<br/>"+datum.value.description+"<br/>Latitude: "+datum.value.latitude+"<br/>Longitude: "+datum.value.longitude+"<br/><a target='_blank' href='"+datum.value.siteUrl+"'>More Details</a>";
+          //   if(datum.value.resultCount > 0){
+          //     download.innerHTML = "<br/><a class='btn btn-success' href='https://www.waterqualitydata.us/Result/search?siteid="+datum.value.MonitoringLocationIdentifier+"&mimeType=csv&zip=yes&sorted=no' target='_blank' > Download "+datum.value.resultCount+" Measurements</a></br>"
+          //   }
+          // }
+          // if(datum.name == "Well") {
+          //   details.innerHTML = "<br/>Name: "+datum.value.well_name+"<br/>ID: "+datum.value.wid+"<br/>Use: "+datum.value.use+"<br/>Driller: "+datum.value.driller+"<br/>Year Drilled: "+datum.value.yr_drilled+"<br/>Surveyor: "+datum.value.surveyor+"<br/>Casing Diameter: "+datum.value.casing_dia+"<br/>Depth: "+datum.value.well_depth+"<br/>Latitude: "+datum.value.latitude+"<br/>Longitude: "+datum.value.longitude;
 
-            let j:number;
-            for(j = 0; j < datum._links.associationIds.length; j++) {
-              if(datum._links.associationIds[j].href.indexOf('ikewai-annotated')!== -1){
-              //  download.innerHTML ='<a href="javascript:void(0);" class="btn btn-success" (click)="downloadClick(\''+datum._links.associationIds[j].href+'\')">Download '+datum._links.associationIds[j].href.split('/').slice(-1)[0]+'</a>'
-              }
-            }
-          }
+          //   let j: number;
+          //   for(j = 0; j < datum._links.associationIds.length; j++) {
+          //     if(datum._links.associationIds[j].href.indexOf('ikewai-annotated')!== -1){
+          //     //  download.innerHTML ='<a href="javascript:void(0);" class="btn btn-success" (click)="downloadClick(\''+datum._links.associationIds[j].href+'\')">Download '+datum._links.associationIds[j].href.split('/').slice(-1)[0]+'</a>'
+          //     }
+          //   }
+          // }
           //goto.innerText = "Go to Entry";
 
-          let popup: L.Popup = new L.Popup();
-          wrapper.append(header);
-          wrapper.append(details);
-          wrapper.append(download);
-          wrapper.append(goto);
+          // let popup: L.Popup = new L.Popup();
+          // wrapper.append(header);
+          // wrapper.append(details);
+          // wrapper.append(download);
+          // wrapper.append(goto);
 
-          let linkDiv = wrapper.getElementsByClassName("entry-link");
+          // let linkDiv = wrapper.getElementsByClassName("entry-link");
 
-          let gotoWrapper = () => {
-            console.log("click");
-            //this.gotoEntry(index);
-          }
-          linkDiv[0].addEventListener("click", gotoWrapper);
-          popup.setContent(wrapper);
-          layer.bindPopup(popup);
+          // let gotoWrapper = () => {
+          //   console.log("click");
+          //   //this.gotoEntry(index);
+          // }
+          // linkDiv[0].addEventListener("click", gotoWrapper);
+          // popup.setContent(wrapper);
+          // layer.bindPopup(popup);
           if(this.dataGroups[group] != undefined) {
             this.dataGroups[group].addLayer(layer);
-            console.log('adding Layer?');
           }
         }
-
       });
+      geojson.getBounds()
+      
     }
-    if (datum.name == 'Variable'){
+    if(datum.name == 'Variable'){
       this.assoc_variables.push(datum)
     }
+    return geojson
     //     this.assoc_metadata.push(datum)
     //     this.selectedAssocMetadata = this.assoc_metadata;
   }
@@ -275,7 +321,6 @@ export class DataViewComponent implements OnInit {
     this.drawnItems.clearLayers();
 
     let datastream: QueryController = this.queryHandler.fetchAssociateMetadata(data_descriptor.uuid, data_descriptor.associationIds);
-    //THIS WILL NOT LOAD ONTO MAP IF RETURNS IMMEDIATELY AND MAP NOT LOADED YET
     datastream.getQueryObserver().subscribe((response: QueryResponse) => {
       console.log("got data!");
       console.log(response);
@@ -334,6 +379,14 @@ export class DataViewComponent implements OnInit {
           this.datastreamPreload.next(metadata);
         }
         
+      }
+    }, () => {}, () => {
+      if(this.mapLoaded) {
+        //push metadata to datastream
+        this.datastream.complete();
+      }
+      else {
+        this.datastreamPreload.next(null);
       }
     });
 
@@ -824,24 +877,31 @@ private getIconByGroup(group: string): L.Icon {
     case "waterQualitySites": {
       icon = new L.Icon({
         iconUrl: 'assets/markers/marker-icon-green.png',
-        iconRetinaUrl: 'assets/markers/marker-icon-2x-green.png',
-        shadowUrl: "assets/marker-shadow.png"
+        // iconRetinaUrl: 'assets/markers/marker-icon-2x-green.png',
+        shadowUrl: "assets/marker-shadow.png",
+        iconSize: [20, 32],
+        iconAnchor: [10, 32]
+
       });
       break;
     }
     case "sites": {
       icon = new L.Icon({
         iconUrl: 'assets/markers/marker-icon-red.png',
-        iconRetinaUrl: 'assets/markers/marker-icon-2x-red.png',
-        shadowUrl: "assets/marker-shadow.png"
+        // iconRetinaUrl: 'assets/markers/marker-icon-2x-red.png',
+        shadowUrl: "assets/marker-shadow.png",
+        iconSize: [20, 32],
+        iconAnchor: [10, 32]
       });
       break;
     }
     case "wells": {
       icon = new L.Icon({
         iconUrl: 'assets/marker-icon.png',
-        iconRetinaUrl: 'assets/marker-icon-2x.png',
-        shadowUrl: "assets/marker-shadow.png"
+        // iconRetinaUrl: 'assets/marker-icon-2x.png',
+        shadowUrl: "assets/marker-shadow.png",
+        iconSize: [20, 32],
+        iconAnchor: [10, 32]
       });
       break;
     }
