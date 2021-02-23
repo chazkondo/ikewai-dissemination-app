@@ -1,5 +1,5 @@
 import { Injectable, Output } from '@angular/core';
-import { Observable, Subject, BehaviorSubject, merge } from 'rxjs';
+import { Observable, Subject, BehaviorSubject, merge, ReplaySubject } from 'rxjs';
 import { SpatialService } from './spatial.service';
 import { QueryCacheService, DataRange, CacheEntryOptions, InsertData } from './query-cache.service';
 import { Metadata } from '../_models/metadata';
@@ -235,13 +235,13 @@ export class QueryHandlerService {
   }
 
   //deal with case where same query running multiple times before complete
-  private handleQuery(query: string): BehaviorSubject<QueryResponse> {
+  private handleQuery(query: string): ReplaySubject<QueryResponse> {
     console.log(query);
-    let dataStream = new BehaviorSubject<QueryResponse>({status: null, data: []});
+    let dataStream = new ReplaySubject<QueryResponse>();
     let stored: DataRange<Metadata> = <DataRange<Metadata>>this.cache.fetchData(query);
     console.log(stored);
-    let offset;
-    let complete;
+    let offset: number;
+    let complete: boolean;
     if(stored == null) {
       offset = 0;
       complete = false;
@@ -267,6 +267,8 @@ export class QueryHandlerService {
       console.log(response);
       console.log("push data");
       dataStream.next(response);
+
+      
     }
 
     //if cache has all the data already no need to execute a query
@@ -321,6 +323,9 @@ export class QueryHandlerService {
       //when dataStream completes or errors out run cleanup
       dataStream.subscribe(null, cleanup, cleanup);
 
+    }
+    else {
+      dataStream.complete();
     }
 
     return dataStream;
@@ -487,16 +492,17 @@ interface QuerySubjectMap {
 }
 
 export class QueryController {
-  private querySubjects: Subject<QueryResponse>[];
-  private queryOutput: Subject<QueryResponse>;
+  private querySubjects: ReplaySubject<QueryResponse>[];
+  private queryOutput: ReplaySubject<QueryResponse>;
 
-  constructor(querySubjects: Subject<QueryResponse>[]) {
+  constructor(querySubjects: ReplaySubject<QueryResponse>[]) {
     this.querySubjects = querySubjects;
-    this.queryOutput = new Subject<QueryResponse>();
+    this.queryOutput = new ReplaySubject<QueryResponse>();
     let completed = 0;
     let loadedResults = 0
     merge(...querySubjects).subscribe((response: QueryResponse) => {
       console.log("data in controller");
+      console.log(response);
       //ignore initial value pushed if no cache data
       if(response.status != null) {
         if(response.data != null) {
