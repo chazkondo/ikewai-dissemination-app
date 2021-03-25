@@ -19,6 +19,7 @@ import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
 import { DataViewComponent } from './data-view/data-view.component';
 import {APP_BASE_HREF} from '@angular/common';
 import { environment } from '../environments/environment';
+import { ReplaceCommas, ToJsonString } from './_helpers/pipe.tranforms';
 
 export function initializeApp(appConfig: AppConfig) {
   return () => appConfig.load();
@@ -31,7 +32,9 @@ export function initializeApp(appConfig: AppConfig) {
     LoginComponent,
     HomeComponent,
     MapComponent,
-    DataViewComponent
+    DataViewComponent,
+    ReplaceCommas,
+    ToJsonString 
   ],
   imports: [
     BrowserModule,

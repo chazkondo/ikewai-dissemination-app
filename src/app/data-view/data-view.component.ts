@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ViewChildren, QueryList, ElementRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ViewChildren, QueryList, ElementRef, Renderer2} from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
 import { Observable, of, BehaviorSubject,throwError, ReplaySubject, Subject } from 'rxjs';
@@ -17,6 +17,7 @@ import { FilterHandle, FilterManagerService, Filter, FilterMode } from '../_serv
 import { mapToExpression } from '@angular/compiler/src/render3/view/util';
 import { HttpClient, HttpHeaders, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from "@angular/router";
+
 
 @Component({
   selector: 'app-data-view',
@@ -88,10 +89,10 @@ export class DataViewComponent implements OnInit {
 
 
   onMapReady(map: L.Map) {
-    
+
     this.mapLoaded = true;
-    
-  
+
+
     //this.metadata =[];
     this.map = map;
 
@@ -204,13 +205,13 @@ export class DataViewComponent implements OnInit {
         else {
           bounds = geojson.getBounds();
         }
-        
+
       }
     }, () => {}, () => {
       if(bounds && !cancelMove) {
         this.map.flyToBounds(bounds);
       }
-      
+
     });
     //push all preloaded data to the main datastream for handling
     this.datastreamPreload.subscribe((metadata: Metadata) => {
@@ -222,7 +223,7 @@ export class DataViewComponent implements OnInit {
       else {
         this.datastream.next(metadata);
       }
-      
+
     });
     //reset preload datastream
     this.datastreamPreload.complete();
@@ -244,7 +245,7 @@ export class DataViewComponent implements OnInit {
         },
         onEachFeature: (feature, layer) => {
 
-          
+
 
           console.log(feature);
           let header = L.DomUtil.create("h6");
@@ -287,7 +288,7 @@ export class DataViewComponent implements OnInit {
             if(datum.value.siteUrl) {
               details.innerHTML += "<br/><a target='_blank' href='" + datum.value.siteUrl + "'>More Details</a>";
             }
-            
+
             if(datum.value.resultCount && datum.value.resultCount > 0) {
               download.innerHTML = "<br/><a class='btn btn-success' href='https://www.waterqualitydata.us/Result/search?siteid=" + datum.value.MonitoringLocationIdentifier + "&mimeType=csv&zip=yes&sorted=no' target='_blank' > Download " + datum.value.resultCount + " Measurements</a>"
             }
@@ -314,7 +315,7 @@ export class DataViewComponent implements OnInit {
             }
             if(datum.value.well_depth) {
               details.innerHTML += "<br/>Depth: " + datum.value.well_depth;
-            }            
+            }
             // details.innerHTML += "<br/>Latitude: " + datum.value.latitude;
             // details.innerHTML += "<br/>Longitude: " + datum.value.longitude;
 
@@ -351,7 +352,7 @@ export class DataViewComponent implements OnInit {
           }
         }
       });
-      
+
     }
     if(datum.name == 'Variable'){
       this.assoc_variables.push(datum)
@@ -398,7 +399,7 @@ export class DataViewComponent implements OnInit {
         this.selectedAssocMetadata = data;
         this.assoc_locations = [];
         this.assoc_variables = [];
-        
+
         // let iconCreateFunction = (group: string): (cluster: any) => L.DivIcon => {
 
         //   return (cluster: any) => {
@@ -440,7 +441,7 @@ export class DataViewComponent implements OnInit {
             //push metadata to preload data stream
             this.datastreamPreload.next(metadata);
           }
-          
+
         }
       }, () => {}, () => {
         if(this.mapLoaded) {
@@ -454,7 +455,7 @@ export class DataViewComponent implements OnInit {
 
       //this.selectedAssocMetadata = assoc_metadata
     }, 0);
-    
+
   }
 
 
