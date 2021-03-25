@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  name: 'dev'
+  name: 'prod',
+  assetBaseUrl: 'http://ikewai.org/wp-content/datasets-app/'
 };

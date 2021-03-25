@@ -17,6 +17,7 @@ import { AppConfig } from './_services/config.service';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
 import { DataViewComponent } from './data-view/data-view.component';
+import {APP_BASE_HREF} from '@angular/common';
 
 export function initializeApp(appConfig: AppConfig) {
   return () => appConfig.load();
@@ -46,6 +47,7 @@ export function initializeApp(appConfig: AppConfig) {
          deps: [AppConfig], multi: true },
       { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
       { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+      {provide: APP_BASE_HREF, useValue: 'http://ikewai.org/datasets/'},
   ],
   bootstrap: [AppComponent]
 })
