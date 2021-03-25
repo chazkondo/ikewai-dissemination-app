@@ -4,7 +4,9 @@
 
 export const environment = {
   production: false,
-  name: 'dev'
+  name: 'dev',
+  assetBaseUrl: './',
+  baseUrl:'./'
 };
 
 /*
