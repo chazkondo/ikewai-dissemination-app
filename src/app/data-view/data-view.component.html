@@ -1,179 +1,144 @@
 
 <div id="datasetModal" class="" tabindex="-1">
-<div class="">
-  <div *ngIf="selectedMetadata" class="modal-content">
-    <div class="modal-header">
-    <h1>{{selectedMetadata.value.title}}</h1>
-    </div>
-    <div  class="modal-body">
-      <div class="row">
-        <div class="col-md-12">
-            <br/>
-            <b>Dataset Files: &nbsp;</b>
-            <span *ngFor="let link of selectedMetadata._links.associationIds ">
-              &nbsp;<a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
-            </span>
-            <!--<span><a href="#" class="btn btn-secondary btn-sm" (click)="downloadSelectedMetadata('text')">Download Metadata Text</a></span>-->&nbsp;
-            <span><a href="#" class="btn btn-secondary btn-sm" (click)="downloadSelectedMetadata('JSON')">Download Metadata JSON</a> </span>
-        </div>
+  <div class="container-fluid">
+    <div *ngIf="selectedMetadata" class="container-fluid">
+      <div class="container-fluid">
+        <h3>{{selectedMetadata.value.title}}</h3>
+        <hr/>
       </div>
-      <div class="row">
-        <div><b>Description:</b>&nbsp;{{selectedMetadata.value.description}}
-        <br/><br/>
-        <div class="map-container col-md-6">
-          <span>
-            <app-map
-              [mapOptions]="options"
-              [drawOptions]="drawOptions"
-              [mapReadyHandler]="onMapReady.bind(this)"
-            ></app-map>
-            <br/><b>Location(s):</b>&nbsp;
-            <ul *ngFor="let assoc of assoc_locations">
-                <li *ngIf ="assoc.name == 'Site'">{{assoc.value.name.replace("?","’").replace("?","’").replace("?","’").replace("?","’")}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
-                <li *ngIf ="assoc.name == 'Well'">{{assoc.value.well_name}}({{assoc.value.wid}})({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
-                <li *ngIf ="assoc.name == 'Water_Quality_Site'">{{assoc.value.name}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
-            </ul>
-          </span>
-        </div>
-
-        <div class="table-responsive details col-md-6">
-        <table class="table col-md-6s">
-          <tr>
-            <td>  <b>Authors:</b>
-              <span *ngFor="let author of selectedMetadata.value.creators ">
-                {{author.first_name}} {{author.last_name}},
+      <div  class="container-fluid">
+        <div class="row">
+          <div class="col-xs-12 col-md-12 col-lg-12">
+              <b>Dataset Files: &nbsp;</b>
+              <span *ngFor="let link of selectedMetadata._links.associationIds ">
+                &nbsp;<button *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class=" fa fa-download btn btn-primary btn-sm" (click)="downloadClick(link.href)">&nbsp;{{link.href.split('/').slice(-1)[0]}}</button>
               </span>
-            </td>
-          </tr>
-          <tr>
-            <td style='width:50%;'> <b>DOI: </b>&nbsp;<a href='http://doi.org/{{selectedMetadata.value.doi}}'target='_blank'>{{selectedMetadata.value.doi}}</a><br/></td>
-          </tr>
-          <tr>
-            <td><b>Data Published:</b>&nbsp;{{selectedMetadata.value.gotDOIDate}}<br/></td>
-          </tr>
-          <tr>
-            <td><b>Start Date</b>&nbsp;{{selectedMetadata.value.start_datetime}} &nbsp; &nbsp;<b>End Date</b>&nbsp;{{selectedMetadata.value.end_datetime}}</td>
-          </tr>
-          <tr>
-            <td><b>Subjects:</b>&nbsp;{{selectedMetadata.value.subjects.join(', ')}}<br/></td>
-          </tr>
-          <tr>
-            <td><b>License:</b>&nbsp;{{selectedMetadata.value.license_rights}}<br/></td>
-          </tr>
-          <tr>
-            <td><b>Data Type:</b>&nbsp;{{selectedMetadata.value.data_types}}<br/></td>
-          <tr>
-            <td><b>Format:</b>&nbsp;{{selectedMetadata.value.formats}}<br/></td>
-          </tr>
-          <tr>
-            <td></td>
-          </tr>
-          <tr>
-            <!-- <td>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 col-lg-12">
+              <b>Metadata: &nbsp;</b>
+              <span>&nbsp;<button  class="btn btn-secondary btn-sm fa fa-download" (click)="downloadSelectedMetadata('JSON')">&nbsp;Metadata JSON</button> </span>
+          </div>
+          <hr/>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-md-12 col-lg-12">
+            <b>Description:</b>&nbsp;{{selectedMetadata.value.description}}
+            <hr/>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-4 col-lg-6">
+            <table class="table details" style="width:100%;">
+              <tr>
+                <td>  <b>Authors:</b>
+                  <span *ngFor="let author of selectedMetadata.value.creators ">
+                    {{author.first_name}} {{author.last_name}},
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td style='width:50%;'> <b>DOI: </b>&nbsp;<a href='http://doi.org/{{selectedMetadata.value.doi}}'target='_blank'>{{selectedMetadata.value.doi}}</a><br/></td>
+              </tr>
+              <tr>
+                <td><b>Data Published:</b>&nbsp;{{selectedMetadata.value.gotDOIDate}}<br/></td>
+              </tr>
+              <tr>
+                <td><b>Start Date</b>&nbsp;{{selectedMetadata.value.start_datetime}} &nbsp; &nbsp;<b>End Date</b>&nbsp;{{selectedMetadata.value.end_datetime}}</td>
+              </tr>
+              <tr>
+                <td><b>Subjects:</b>&nbsp;{{selectedMetadata.value.subjects.join(', ')}}<br/></td>
+              </tr>
+              <tr>
+                <td><b>License:</b>&nbsp;{{selectedMetadata.value.license_rights}}<br/></td>
+              </tr>
+              <tr>
+                <td><b>Data Type:</b>&nbsp;{{selectedMetadata.value.data_types}}<br/></td>
+              <tr>
+                <td><b>Format:</b>&nbsp;{{selectedMetadata.value.formats}}<br/></td>
+              </tr>
+              <tr>
+                <td></td>
+              </tr>
+              <tr>
+                <td *ngIf="assoc_variables.length > 0">
+                  <span><b>Variables:</b>&nbsp;
+                    <!-- The Modal -->
+                    <div *ngIf="show_var_modal && selectedVariable" id="varModal">
+                      <!-- Modal content -->
+                      <div class="modal-content">
+                        <div class="close" style="float: right; padding-left:95%;" (click)="closeVarInfo()">&times;</div>
+                        <div id="var-content px-md-5" style="padding:5px; ">
+                            <b>ID:</b>&nbsp;{{selectedVariable.value.id}}<br/>
+                            <b>Name:</b>&nbsp;{{selectedVariable.value.variable_name}}<br/>
+                            <b>Unit:</b>&nbsp;{{selectedVariable.value.unit}}<br/>
+                            <b>Sample Medium:</b>&nbsp;{{selectedVariable.value.samplem}}<br/>
+                            <b>Category:</b>&nbsp;{{selectedVariable.value.category}}<br/>
+                            <b>Value Type:</b>&nbsp;{{selectedVariable.value.value_type}}<br/>
+                            <b>Data Type:</b>&nbsp;{{selectedVariable.value.data_type}}<br/>
+                            <span *ngIf="selectedVariable != null && selectedVariable.value.speciation != null">
+                              <b>Speciation:</b>&nbsp;{{selectedVariable.value.speciation}}<br/>
+                            </span>
+                            <b>Description:</b>&nbsp;{{selectedVariable.value.description}}<br/>
+                        </div>
+                      </div>
+
+                    </div>
+                  <div class="table-responsive">
+                  <table *ngIf="assoc_variables.length > 0" class="table">
+                    <tr>
+                      <th>Name</th>
+                      <th>Unit</th>
+                      <th>Category</th>
+                      <th>Medium</th>
+                      <th>Action</th>
+                    </tr>
+                    <tr *ngFor="let assoc of assoc_variables" class="hover">
+                      <td>{{assoc.value.variable_name}}</td>
+                      <td>{{assoc.value.unit}}</td>
+                      <td>{{assoc.value.category}}</td>
+                      <td>{{assoc.value.samplem}}</td>
+                      <td>
+                        <a href="#" class='btn-info btn-sm' (click)="showVariableInfo(assoc)">More...</a>
+                      </td>
+                    </tr>
+                  </table></div>
+                  </span>
+                  </td>
+                </tr>
+            </table>
+          </div>
+          <div class="col-xs-12 col-sm-12 col-md-5 col-lg-6">
+            <div class="map-container">
               <span>
-                <b>Location(s):</b>&nbsp;
                 <app-map
                   [mapOptions]="options"
                   [drawOptions]="drawOptions"
                   [mapReadyHandler]="onMapReady.bind(this)"
                 ></app-map>
+                <br/><b>Location(s):</b>&nbsp;
                 <ul *ngFor="let assoc of assoc_locations">
                     <li *ngIf ="assoc.name == 'Site'">{{assoc.value.name.replace("?","’").replace("?","’").replace("?","’").replace("?","’")}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
                     <li *ngIf ="assoc.name == 'Well'">{{assoc.value.well_name}}({{assoc.value.wid}})({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
                     <li *ngIf ="assoc.name == 'Water_Quality_Site'">{{assoc.value.name}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
-                  </ul>
+                </ul>
               </span>
-            </td> -->
-            <td *ngIf="assoc_variables.length > 0">
-              <span><b>Variables:</b>&nbsp;
-                <!-- The Modal -->
-                <div *ngIf="show_var_modal && selectedVariable" id="varModal">
-                  <!-- Modal content -->
-                  <div class="modal-content">
-                    <div class="close" style="float: right; padding-left:95%;" (click)="closeVarInfo()">&times;</div>
-                    <div id="var-content px-md-5" style="padding:5px; ">
-                        <b>ID:</b>&nbsp;{{selectedVariable.value.id}}<br/>
-                        <b>Name:</b>&nbsp;{{selectedVariable.value.variable_name}}<br/>
-                        <b>Unit:</b>&nbsp;{{selectedVariable.value.unit}}<br/>
-                        <b>Sample Medium:</b>&nbsp;{{selectedVariable.value.samplem}}<br/>
-                        <b>Category:</b>&nbsp;{{selectedVariable.value.category}}<br/>
-                        <b>Value Type:</b>&nbsp;{{selectedVariable.value.value_type}}<br/>
-                        <b>Data Type:</b>&nbsp;{{selectedVariable.value.data_type}}<br/>
-                        <span *ngIf="selectedVariable != null && selectedVariable.value.speciation != null">
-                          <b>Speciation:</b>&nbsp;{{selectedVariable.value.speciation}}<br/>
-                        </span>
-                        <b>Description:</b>&nbsp;{{selectedVariable.value.description}}<br/>
-                    </div>
-                  </div>
+            </div>
+          </div>
+        </div>
 
-                </div>
-              <div class="table-responsive">
-              <table *ngIf="assoc_variables.length > 0" class="table">
-                <tr>
-                  <th>Name</th>
-                  <th>Unit</th>
-                  <th>Category</th>
-                  <th>Medium</th>
-                  <th>Action</th>
-                </tr>
-                <tr *ngFor="let assoc of assoc_variables" class="hover">
-                  <td>{{assoc.value.variable_name}}</td>
-                  <td>{{assoc.value.unit}}</td>
-                  <td>{{assoc.value.category}}</td>
-                  <td>{{assoc.value.samplem}}</td>
-                  <td>
-                    <a href="#" class='btn-info btn-sm' (click)="showVariableInfo(assoc)">More...</a>
-                  </td>
-                </tr>
-              </table></div>
-              </span>
-              </td>
-            </tr>
-        </table>
+        <div class="row">
+          <div class="col-xs-12 col-md-12 col-lg-12">
+            <i style="font-size:10pt;">Unique 'Ike Wai URL: <a href='{{base_url}}?dd={{selectedMetadata.uuid}}'>{{base_url}}?dd={{selectedMetadata.uuid}}</a></i></div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-md-12 col-lg-12">
+        <b>‘Ike Wai:</b><br/>
+        In 2016, University of Hawai‘i launched the Hawai‘i EPSCoR ‘Ike Wai project supported by the National Science Foundation (Award # OIA-1557349) The five-year project uses integrated research, education, and community engagement efforts aimed to ensure Hawai‘i’s future water security and promote resource management within the state that is sustainable, responsible, and data-driven.
+          </div>
         </div>
       </div>
-
-      <div class="modal-footer">
-        <div><i style="font-size:10pt;">Unique 'Ike Wai URL: <a href='http://ikewai.org/datasets/?dd={{selectedMetadata.uuid}}'>http://ikewai.org/datasets/?dd={{selectedMetadata.uuid}}</a></i></div>
-            </div>
-    </div>
+     </div>
    </div>
- </div>
-</div>
-</div>
-
-
-<div class="row">
-  <!--- <div class="col-md-7">
-      <div leaflet class="map pull-left"
-        leafletDraw
-        [leafletOptions]="options"
-        [leafletDrawOptions]="drawOptions"
-        (leafletDrawCreated)="onDrawCreated($event)"
-        (leafletMapReady)="onMapReady($event)" >
-      </div>
-    </div>-->
-  <div class="col-md-12">
-  <!-- <div class="grid">
-    <div class="bl">Color Legend</div>
-    <div class="ht">Cluster Size</div>
-    <div class="hl">Site Type</div>
-    <div class="s1">1-9</div>
-    <div class="s2">10-100</div>
-    <div class="s3">100+</div>
-    <div class="t1">Well</div>
-    <div class="t2">Site</div>
-    <div class="t3">Water Quality Site</div>
-
-    <div class="c1"><div class="color-circle color-1"></div></div>
-    <div class="c2"><div class="color-circle color-2"></div></div>
-    <div class="c3"><div class="color-circle color-3"></div></div>
-    <div class="c4"><div class="color-circle color-4"></div></div>
-    <div class="c5"><div class="color-circle color-5"></div></div>
-    <div class="c6"><div class="color-circle color-6"></div></div>
-    <div class="c7"><div class="color-circle color-7"></div></div>
-    <div class="c8"><div class="color-circle color-8"></div></div>
-    <div class="c9"><div class="color-circle color-9"></div></div>
-  </div> -->
-
 </div>

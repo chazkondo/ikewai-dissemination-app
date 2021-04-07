@@ -17,7 +17,7 @@ import { FilterHandle, FilterManagerService, Filter, FilterMode } from '../_serv
 import { mapToExpression } from '@angular/compiler/src/render3/view/util';
 import { HttpClient, HttpHeaders, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from "@angular/router";
-
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-data-view',
@@ -31,7 +31,7 @@ export class DataViewComponent implements OnInit {
   @ViewChildren("entries") entries: QueryList<ElementRef>;
 
   highlightEntries: ElementRef[] = [];
-
+  base_url : String;
   metadata: Metadata[];
   filterData: Metadata[];
   selectedMetadata: Metadata;
@@ -589,6 +589,7 @@ ngOnInit() {
   this.assoc_variables=[];
   console.log(this.route.snapshot.queryParams['dd']);
   this.show_var_modal = false;
+  this.base_url = environment.baseUrl;
 
   //console.log(this.defaultFilterHandle);
   //this.defaultFilterSource = this.queryHandler.getFilterObserver(this.defaultFilterHandle);
