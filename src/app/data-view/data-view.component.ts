@@ -375,11 +375,11 @@ export class DataViewComponent implements OnInit {
   selectDataDescriptor(data_descriptor) {
     //reset everything
     //easiest to just deselect and flush event loop to destroy and reinit map
+
     this.deselectDataDescriptor();
     setTimeout(() => {
       console.log(data_descriptor);
       this.selectedMetadata = data_descriptor;
-
       //reset any drawn items
       this.drawnItems.clearLayers();
 
@@ -447,6 +447,9 @@ export class DataViewComponent implements OnInit {
         if(this.mapLoaded) {
           //push metadata to datastream
           this.datastream.complete();
+          if (this.route.snapshot.queryParams['dd'] == data_descriptor.uuid) {
+            //document.getElementById(data_descriptor.uuid).click();
+          }
         }
         else {
           this.datastreamPreload.next(null);
@@ -586,6 +589,7 @@ ngOnInit() {
   this.assoc_variables=[];
   console.log(this.route.snapshot.queryParams['dd']);
   this.show_var_modal = false;
+
   //console.log(this.defaultFilterHandle);
   //this.defaultFilterSource = this.queryHandler.getFilterObserver(this.defaultFilterHandle);
   // this.defaultFilterSource.subscribe((data: Metadata[]) => {
@@ -643,6 +647,8 @@ public initSearch() {
     //  if((datum.name=="Water_Quality_Site" && datum.value.resultCount > 0)) || datum._links.associationIds.length > 0){
         this.metadata.push(datum)
         if (this.route.snapshot.queryParams['dd'] == datum.uuid) {
+          //console.log(datum.uuid.toString())
+          //document.getElementById(datum.uuid.toString()).click();
           this.selectDataDescriptor(datum)
         }
         let group = NameGroupMap[datum.name];

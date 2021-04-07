@@ -1,10 +1,9 @@
 
-<div id="datasetModal" class="modal modal-fullscreen" tabindex="-1">
-<div class="modal-dialog modal-fullscreen">
+<div id="datasetModal" class="" tabindex="-1">
+<div class="">
   <div *ngIf="selectedMetadata" class="modal-content">
     <div class="modal-header">
-    <h4>Title:&nbsp;{{selectedMetadata.value.title}}</h4>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <h1>{{selectedMetadata.value.title}}</h1>
     </div>
     <div  class="modal-body">
       <div class="row">
@@ -23,12 +22,12 @@
         <br/><br/>
         <div class="map-container col-md-6">
           <span>
-            <b>Location(s):</b>&nbsp;
             <app-map
               [mapOptions]="options"
               [drawOptions]="drawOptions"
               [mapReadyHandler]="onMapReady.bind(this)"
             ></app-map>
+            <br/><b>Location(s):</b>&nbsp;
             <ul *ngFor="let assoc of assoc_locations">
                 <li *ngIf ="assoc.name == 'Site'">{{assoc.value.name.replace("?","’").replace("?","’").replace("?","’").replace("?","’")}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
                 <li *ngIf ="assoc.name == 'Well'">{{assoc.value.well_name}}({{assoc.value.wid}})({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
@@ -136,9 +135,7 @@
 
       <div class="modal-footer">
         <div><i style="font-size:10pt;">Unique 'Ike Wai URL: <a href='http://ikewai.org/datasets/?dd={{selectedMetadata.uuid}}'>http://ikewai.org/datasets/?dd={{selectedMetadata.uuid}}</a></i></div>
-        <br/>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"  (click)="deselectDataDescriptor()">Close</button>
-      </div>
+            </div>
     </div>
    </div>
  </div>
@@ -179,39 +176,4 @@
     <div class="c9"><div class="color-circle color-9"></div></div>
   </div> -->
 
-  <div *ngIf="metadata.length > 0">
-  <h5>Results {{filterData.length}}</h5>
-  <input class="form" type="text" (keyup)='tableSearch($event.target.value)' placeholder="Filter Results">
-  <div style="overflow: auto; height:500px;" class="table-responsive">
-    <table class="table">
-      <tr>
-          <th>Title</th>
-          <th>DOI</th>
-          <th>Files</th>
-          <!-- <th style="visibility: hidden;">hidden</th> -->
-      </tr>
-      <tr *ngFor="let metadatum of filterData">
-
-          <td width="40%">
-            <button type="button" data-bs-toggle="modal" data-bs-target="#datasetModal" (click)="selectDataDescriptor(metadatum)">View</button>
-
-            <span #entries>&nbsp;&nbsp;{{metadatum.value.title}}</span>
-          </td>
-          <td>
-            <span #entries><a href='http://doi.org/{{metadatum.value.doi}}'target='_blank'>{{metadatum.value.doi}}</a></span>
-          </td>
-          <td width="20%">
-            <div >
-                <span *ngFor="let link of metadatum._links.associationIds ">
-                  <a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
-                </span>
-            </div>
-          </td>
-          <!-- <td style="visibility: hidden;">
-            {{metadatum | toJsonString}}
-          </td> -->
-        </tr>
-      </table>
-    </div>
-  </div>
 </div>
