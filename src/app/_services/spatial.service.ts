@@ -24,8 +24,9 @@ export class SpatialService {
     // }
 
     //console.log(AppConfig.settings.aad.tenant);
+    let url = "https://ikeauth.its.hawaii.edu/search/v2/data?q=" + encodeURI(query) + "&limit=" + limit.toString() + "&offset=" + offset.toString();
 
-    let url = AppConfig.settings.aad.tenant + "/search/v2/data?q=" + encodeURI(query) + "&limit=" + limit.toString() + "&offset=" + offset.toString();
+    //let url = AppConfig.settings.aad.tenant + "/search/v2/data?q=" + encodeURI(query) + "&limit=" + limit.toString() + "&offset=" + offset.toString();
     //url = "https://agaveauth.its.hawaii.edu/meta/v2/data/3988988121641119255-242ac1111-0001-012"
     //console.log(url);
     //.set("Authorization", "Bearer " + currentUser.access_token)

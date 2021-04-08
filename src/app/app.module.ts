@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-
+import { NgModule, Injector } from '@angular/core';
+import { createCustomElement } from '@angular/elements';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
@@ -34,7 +34,7 @@ export function initializeApp(appConfig: AppConfig) {
     MapComponent,
     DataViewComponent,
     ReplaceCommas,
-    ToJsonString 
+    ToJsonString
   ],
   imports: [
     BrowserModule,
@@ -53,6 +53,14 @@ export function initializeApp(appConfig: AppConfig) {
       { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
       {provide: APP_BASE_HREF, useValue: environment.baseUrl},
   ],
-  bootstrap: [AppComponent]
+  //bootstrap: [DataViewComponent],
+  entryComponents: [DataViewComponent]
 })
-export class AppModule { }
+export class AppModule {
+
+  constructor(private injector: Injector) {
+          const el = createCustomElement(DataViewComponent, { injector });
+          customElements.define('app-dataview', el);
+  }
+  ngDoBootstrap() {}
+}

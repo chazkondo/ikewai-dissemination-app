@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ViewChildren, QueryList, ElementRef, Renderer2} from '@angular/core';
+import { Component, OnInit, Input, ViewChild, AfterViewInit, ViewChildren, QueryList, ElementRef, Renderer2} from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
 import { Observable, of, BehaviorSubject,throwError, ReplaySubject, Subject } from 'rxjs';
@@ -25,6 +25,7 @@ import { environment } from '../../environments/environment';
   styleUrls: ['./data-view.component.css']
 })
 export class DataViewComponent implements OnInit {
+  @Input() public dd:string;
 
   static readonly DEFAULT_RESULTS = 10;
 
@@ -447,9 +448,9 @@ export class DataViewComponent implements OnInit {
         if(this.mapLoaded) {
           //push metadata to datastream
           this.datastream.complete();
-          if (this.route.snapshot.queryParams['dd'] == data_descriptor.uuid) {
+          //if (this.route.snapshot.queryParams['dd'] == data_descriptor.uuid) {
             //document.getElementById(data_descriptor.uuid).click();
-          }
+          //}
         }
         else {
           this.datastreamPreload.next(null);
@@ -587,7 +588,8 @@ ngOnInit() {
   this.assoc_metadata=[];
   this.assoc_locations=[];
   this.assoc_variables=[];
-  console.log(this.route.snapshot.queryParams['dd']);
+  //console.log(this.route.snapshot.queryParams['dd']);
+  console.log(this.dd)
   this.show_var_modal = false;
   this.base_url = environment.baseUrl;
 
@@ -647,7 +649,7 @@ public initSearch() {
       let datum = data[index];
     //  if((datum.name=="Water_Quality_Site" && datum.value.resultCount > 0)) || datum._links.associationIds.length > 0){
         this.metadata.push(datum)
-        if (this.route.snapshot.queryParams['dd'] == datum.uuid) {
+        if (this.dd == datum.uuid) {
           //console.log(datum.uuid.toString())
           //document.getElementById(datum.uuid.toString()).click();
           this.selectDataDescriptor(datum)
