@@ -1,5 +1,31 @@
-# Browse Application
-Ike Wai published data browser application in Angular.
+# Ike Wai Dataset Web Component
+
+
+To setup you have to determine where the bundle will be deployed then modify the environments/environment.prod.ts file and update the location of the baseUlr and assetBaseUrl to point to the locations it will be deployed
+
+To build use:
+```
+ng build --prod --output-hashing=none
+```
+
+Then concatenate files into a single .js file if desired (otherwise you have to include them each)
+```
+cat dist/ng-agave-login/{polyfills,runtime,main}.js > custom-element.js
+```
+
+Copy the dist/ng-agave-login folder contents to the deployment location on the server
+
+
+In the webpage you want to embed this component you add:
+```
+<link rel="stylesheet" href="/deploymentPath/styles.css">
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<app-dataview dd="CHANGE TO ID OF DATA DESCRIPTOR DATASET"></app-dataview>
+<script src="/wp-content/ddViewer/custom-element.js"></script>
+```
+
+NOTE the sytle.css path needs to match you deployment (you might also add this to the head of the page or overall application) the "app-dataview" html component needs the "dd" property updated to whichever data descriptor dataset uuid you want to render.
+
 
 ## Development with Docker
 
