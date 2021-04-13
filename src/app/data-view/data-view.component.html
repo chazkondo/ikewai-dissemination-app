@@ -63,7 +63,15 @@
                 <td><b>Format:</b>&nbsp;{{selectedMetadata.value.formats}}<br/></td>
               </tr>
               <tr>
-                <td></td>
+                <td> <br/><b>Location(s):</b>&nbsp;
+                               <div class="locations">
+
+                                <ul *ngFor="let assoc of assoc_locations">
+                                    <li *ngIf ="assoc.name == 'Site'">{{assoc.value.name.replace("?","’").replace("?","’").replace("?","’").replace("?","’")}}&nbsp;&nbsp;({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
+                                    <li *ngIf ="assoc.name == 'Well'">{{assoc.value.well_name}}&nbsp;({{assoc.value.wid}})&nbsp;&nbsp;({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
+                                    <li *ngIf ="assoc.name == 'Water_Quality_Site'">{{assoc.value.name}}&nbsp;&nbsp;({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
+                                </ul>
+                              </div></td>
               </tr>
               <tr>
                 <td *ngIf="assoc_variables.length > 0">
@@ -121,13 +129,8 @@
                   [drawOptions]="drawOptions"
                   [mapReadyHandler]="onMapReady.bind(this)"
                 ></app-map>
-                <br/><b>Location(s):</b>&nbsp;
-                <ul *ngFor="let assoc of assoc_locations">
-                    <li *ngIf ="assoc.name == 'Site'">{{assoc.value.name.replace("?","’").replace("?","’").replace("?","’").replace("?","’")}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
-                    <li *ngIf ="assoc.name == 'Well'">{{assoc.value.well_name}}({{assoc.value.wid}})({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
-                    <li *ngIf ="assoc.name == 'Water_Quality_Site'">{{assoc.value.name}}({{assoc.value.latitude}},{{assoc.value.longitude}})</li>
-                </ul>
               </span>
+
             </div>
           </div>
         </div>

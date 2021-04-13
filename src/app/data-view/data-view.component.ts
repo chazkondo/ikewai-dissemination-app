@@ -322,7 +322,7 @@ export class DataViewComponent implements OnInit {
 
             for(let i = 0; i < datum._links.associationIds.length; i++) {
               if(datum._links.associationIds[i].href.indexOf('ikewai-annotated') !== -1) {
-                download.innerHTML ='<a href="javascript:void(0);" class="btn btn-success" (click)="downloadClick(\''+datum._links.associationIds[i].href+'\')">Download '+datum._links.associationIds[i].href.split('/').slice(-1)[0]+'</a>'
+                //download.innerHTML ='<a href="javascript:void(0);" class="btn btn-success" (click)="downloadClick(\''+datum._links.associationIds[i].href+'\')">Download '+datum._links.associationIds[i].href.split('/').slice(-1)[0]+'</a>'
               }
             }
           }
@@ -674,7 +674,7 @@ public initSearch() {
             if(datum.name == "Water_Quality_Site"){
               details.innerHTML = "<br/>Name: "+datum.value.name+"<br/>ID: "+datum.value.MonitoringLocationIdentifier+"<br/>Provider: "+datum.value.ProviderName+"<br/>"+datum.value.description+"<br/>Latitude: "+datum.value.latitude+"<br/>Longitude: "+datum.value.longitude+"<br/><a target='_blank' href='"+datum.value.siteUrl+"'>More Details</a>";
               if(datum.value.resultCount > 0){
-                download.innerHTML = "<br/><a class='btn btn-success' href='https://www.waterqualitydata.us/Result/search?siteid="+datum.value.MonitoringLocationIdentifier+"&mimeType=csv&zip=yes&sorted=no' target='_blank' > Download "+datum.value.resultCount+" Measurements</a></br>"
+                //download.innerHTML = "<br/><a class='btn btn-success' href='https://www.waterqualitydata.us/Result/search?siteid="+datum.value.MonitoringLocationIdentifier+"&mimeType=csv&zip=yes&sorted=no' target='_blank' > Download "+datum.value.resultCount+" Measurements</a></br>"
               }
             }
             if(datum.name == "Well") {
@@ -801,7 +801,7 @@ public onDrawCreated(e: any) {
             if(datum.name == "Water_Quality_Site"){
               details.innerHTML = "<br/>Name: "+datum.value.name+"<br/>ID: "+datum.value.MonitoringLocationIdentifier+"<br/>Provider: "+datum.value.ProviderName+"<br/>"+datum.value.description+"<br/>Latitude: "+datum.value.latitude+"<br/>Longitude: "+datum.value.longitude+"<br/><a target='_blank' href='"+datum.value.siteUrl+"'>More Details</a>";
               if(datum.value.resultCount > 0){
-                download.innerHTML = "<br/><a class='btn btn-success' href='https://www.waterqualitydata.us/Result/search?siteid="+datum.value.MonitoringLocationIdentifier+"&mimeType=csv&zip=yes&sorted=no' target='_blank' > Download "+datum.value.resultCount+" Measurements</a></br>"
+                //download.innerHTML = "<br/><a class='btn btn-success' href='https://www.waterqualitydata.us/Result/search?siteid="+datum.value.MonitoringLocationIdentifier+"&mimeType=csv&zip=yes&sorted=no' target='_blank' > Download "+datum.value.resultCount+" Measurements</a></br>"
               }
             }
             if(datum.name == "Well"){
@@ -950,9 +950,9 @@ private getIconByGroup(group: string): L.Icon {
   switch(group) {
     case "waterQualitySites": {
       icon = new L.Icon({
-        iconUrl: 'assets/markers/marker-icon-green.png',
+        iconUrl: `${environment.assetBaseUrl}/assets/marker-icon.png`,
         // iconRetinaUrl: 'assets/markers/marker-icon-2x-green.png',
-        shadowUrl: "assets/marker-shadow.png",
+        shadowUrl: `${environment.assetBaseUrl}/assets/marker-shadow.png`,
         iconSize: [20, 32],
         iconAnchor: [10, 32]
 
@@ -961,9 +961,9 @@ private getIconByGroup(group: string): L.Icon {
     }
     case "sites": {
       icon = new L.Icon({
-        iconUrl: 'assets/markers/marker-icon-red.png',
+        iconUrl: `${environment.assetBaseUrl}/assets/marker-icon.png`,
         // iconRetinaUrl: 'assets/markers/marker-icon-2x-red.png',
-        shadowUrl: "assets/marker-shadow.png",
+        shadowUrl: `${environment.assetBaseUrl}/assets/marker-shadow.png`,
         iconSize: [20, 32],
         iconAnchor: [10, 32]
       });
@@ -971,9 +971,9 @@ private getIconByGroup(group: string): L.Icon {
     }
     case "wells": {
       icon = new L.Icon({
-        iconUrl: 'assets/marker-icon.png',
+        iconUrl: `${environment.assetBaseUrl}/assets/marker-icon.png`,
         // iconRetinaUrl: 'assets/marker-icon-2x.png',
-        shadowUrl: "assets/marker-shadow.png",
+        shadowUrl: `${environment.assetBaseUrl}/assets/marker-shadow.png`,
         iconSize: [20, 32],
         iconAnchor: [10, 32]
       });
