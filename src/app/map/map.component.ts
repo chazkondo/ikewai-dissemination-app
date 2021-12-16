@@ -100,7 +100,7 @@ export class MapComponent implements OnInit, AfterViewInit {
       +'</div>'
       return legend;
     }
-    legendControl.addTo(this.map);
+    //legendControl.addTo(this.map);
 
     let iconCreateFunction = (group: string): (cluster: any) => L.DivIcon => {
 
