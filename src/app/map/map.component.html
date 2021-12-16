@@ -7,6 +7,7 @@
         (leafletDrawCreated)="onDrawCreated($event)"
         (leafletMapReady)="onMapReady($event)" >
       </div>
+      Click a green circle to zoom into a cluster of water quality sites. Click a green map pin to see more information about a location.
     </div>
     <div class="col-md-5">
     <!-- <div class="grid">
@@ -40,12 +41,13 @@
           <th>ID</th>
           <th>Name</th>
           <th>Provider</th>
-          <th>Lat,Long</th>
           <th>Files</th>
       </tr>
       <tr *ngFor="let metadatum of filterData">
           <td >
+            <a target='_blank' href='{{metadatum.value.siteUrl}}'>
               {{metadatum.value.wid}}{{metadatum.value.MonitoringLocationIdentifier}}
+            </a>
           </td>
           <td width="40%">
             <span #entries>{{metadatum.value.name}}</span>
@@ -56,10 +58,6 @@
             <span *ngIf="metadatum.name == 'Well'">
               {{metadatum.value.yr_drilled}}</span>
               <span *ngIf="metadatum.name == 'Water_Quality_Site'">{{metadatum.value.ProviderName}}</span>
-          </td>
-          <td >
-              {{metadatum.value.latitude}},
-                  {{metadatum.value.longitude}}
           </td>
           <td width="20%">
               <span *ngIf="metadatum.name == 'Water_Quality_Site' && metadatum.value.resultCount > 0">
