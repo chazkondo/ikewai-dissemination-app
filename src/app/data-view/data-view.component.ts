@@ -472,13 +472,9 @@ export class DataViewComponent implements OnInit {
   }
 
   downloadClick(metadatum_href){
-      this.createPostit(metadatum_href).subscribe(result => {
-        this.result =result
-        console.log(result.body.result._links.self.href)
-        window.open(result.body.result._links.self.href, "_blank");
-
-      })
-
+    let downloadString = metadatum_href.replace("media","download/public")
+    console.log(downloadString)
+    window.open(downloadString, "_blank");
   }
 
 
