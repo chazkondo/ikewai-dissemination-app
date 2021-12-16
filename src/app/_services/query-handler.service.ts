@@ -203,7 +203,7 @@ export class QueryHandlerService {
     let i;
     for(i = 0; i < features.length; i++) {
       //need to do something to handle too long queries
-      let query = "{'$and':[{'name':{'$in':['Water_Quality_Site']}},{'value.loc': {$geoWithin: {'$geometry':" + JSON.stringify(features[i].geometry).replace(/"/g,'\'') + "}}}]}";
+      let query = "{'$and':[{'name':{'$in':['Water_Quality_Site']}},{'value.activityCount': {'$ne': '0'}}, {'value.loc': {$geoWithin: {'$geometry':" + JSON.stringify(features[i].geometry).replace(/"/g,'\'') + "}}}]}";
       subjects.push(this.handleQuery(query));
     }
 
