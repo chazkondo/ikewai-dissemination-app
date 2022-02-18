@@ -16,6 +16,7 @@ import { AppConfig } from './_services/config.service';
 
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { LeafletDrawModule } from '@asymmetrik/ngx-leaflet-draw';
+import { DataTablesModule } from "angular-datatables";
 
 export function initializeApp(appConfig: AppConfig) {
   return () => appConfig.load();
@@ -35,7 +36,8 @@ export function initializeApp(appConfig: AppConfig) {
     HttpClientModule,
     AppRoutingModule,
     LeafletModule.forRoot(),
-    LeafletDrawModule.forRoot()
+    LeafletDrawModule.forRoot(),
+    DataTablesModule
   ],
   providers: [
       AppConfig,

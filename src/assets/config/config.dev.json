@@ -1,0 +1,21 @@
+{
+    "env": {
+    "name": "DEV"
+     },
+    "appInsights": {
+    "instrumentationKey": "<dev-guid-here>"
+     },
+    "logging": {
+    "console": true,
+    "appInsights": false
+    },
+    "aad": {
+    "requireAuth": true,
+    "tenant": "https://ikeauth.its.hawaii.edu",
+    "loginURL": "https://ikewai-dev.its.hawaii.edu:8000/login",
+    "accessToken": "a448d5376b956dcc5589516ddefcf7bc"
+    },
+    "apiServer": {
+    "agaveChords": "http://localhost:4000"
+    }
+}

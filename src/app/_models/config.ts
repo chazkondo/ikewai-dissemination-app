@@ -13,7 +13,7 @@ export class IAppConfig {
         requireAuth: boolean;
         tenant: string;
         loginURL: string;
-
+        accessToken: string;
     };
     apiServer: {
         metadata: string;

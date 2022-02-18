@@ -15,6 +15,7 @@ export class AppComponent {
   title = 'ng-agave-login';
   currentUser: User;
   public tenant = AppConfig.settings.aad.tenant
+  public accessToken = AppConfig.settings.aad.accessToken
   constructor(
       private router: Router,
       private authenticationService: AuthenticationService

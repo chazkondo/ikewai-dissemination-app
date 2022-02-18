@@ -1,20 +1,180 @@
-<div leaflet style="height: 400px;width:800px"
-     leafletDraw
-     [leafletOptions]="options"
-     [leafletDrawOptions]="drawOptions"
-     (leafletDrawCreated)="onDrawCreated($event)">
+<div class="container-fluid">
+<div class="row">
+    <div class="col-md-6">
+      <div leaflet class="map pull-left"
+        [leafletOptions]="options"
+        (leafletMapMoveEnd)="onMove($event)"
+        (leafletMapReady)="onMapReady($event)" >
+      </div>
+    </div>
+    <div class="col-md-6">
+    <div *ngIf="metadata.length == 0" style="height:500px;">
+      <h5>No Results For Current Area.</h5>
+    </div>
+    <div *ngIf="metadata.length > 0" style="height:500px;">
+    <h5>Results {{filterData.length}}</h5>
+    <input class="form" type="text" (keyup)='tableSearch($event.target.value)' placeholder="Filter Results" id="filterField">
+    <div style="overflow: auto; height:440px;" class="table-responsive">
+    <table  class="table row-border hover table-striped">
+      <tr >
+          <th class='header'></th>
+          <th class='header'>ID</th>
+          <th class='header'>Name</th>
+          <th class='header'>Drilled</th>
+          <th class='header'>Files</th>
+      </tr>
+      <tr *ngFor="let metadatum of filterData">
+          <td >
+            <button id="linked-{{metadatum.uuid}}" class="btn btn-primary" type="button" (click)="openLinkedPopup(metadatum)">Find</button>
+          </td>
+          <td >
+            <button id="{{metadatum.uuid}}" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#location-modal" (click)="openModalDialog(metadatum)">View</button>
+          </td>
+          <td width="40%">
+            <span #entries>{{metadatum.value.name}}</span>
+            <span #entries>{{metadatum.value.station_name}}</span>
+            <span #entries>{{metadatum.value.well_name}}</span>
+          </td>
+          <td >
+            <span *ngIf="metadatum.name == 'Well'">
+              {{metadatum.value.yr_drilled}}</span>
+              <span *ngIf="metadatum.name == 'Water_Quality_Site'">{{metadatum.value.ProviderName}}</span>
+          </td>
+          <td width="20%">
+              <span *ngIf="metadatum.name == 'Water_Quality_Site' && metadatum.value.resultCount > 0">
+                  <a class="btn btn-success" href='https://www.waterqualitydata.us/Result/search?siteid={{metadatum.value.MonitoringLocationIdentifier}}&mimeType=csv&zip=yes&sorted=no' target="_blank" > Download {{metadatum.value.resultCount}} Measurements</a>
+              </span>
+            <div *ngIf="metadatum.name == 'Well'">
+                <span *ngFor="let link of metadatum._links.associationIds ">
+                  <a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" (click)="downloadClick(link.href)">Download {{link.href.split('/').slice(-1)[0]}}</a>
+                </span>
+            </div>
+          </td>
+        </tr>
+      </table>
+      </div>
+      </div>
+    </div>
 </div>
-<div *ngIf="metadata">
-<h2>My Metadata</h2>
-<table>
-  <tr>
-    <td>
-      <ul class="metadata">
-        <li *ngFor="let metadatum of metadata">
-          {{metadatum | json}} 
-        </li>
-      </ul>
-    </td>
-  </tr>
-</table>
+
+<!-- modal -->
+<div id="location-modal" class="modal" tabindex="-1">
+  <!-- modal-dialog -->
+  <div id="location-dialog" class="modal-dialog modal-xl">
+    <!-- modal-content -->
+    <div *ngIf="selectedMetadata"  class="modal-content">
+      <!-- modal-header -->
+      <div class="modal-header">
+        <h3>{{selectedMetadata.value.well_name}}</h3>
+         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- <h4 class="modal-title">Login</h4> -->
+      </div>
+
+      <!-- modal-body -->
+      <div class="modal-body">
+        <div>
+          <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-6">
+              <div leaflet class="mapZoomed pull-left" id="mapZoomedHolder"
+                [leafletOptions]="optionsZoomed" 
+                (leafletMapReady)="onMapZoomedReady($event)" >
+              </div>
+              <div *ngFor="let link of selectedMetadata._links.associationIds " style="padding: 5px 0px 5px 0px;" id="dataPreview" >
+                <iframe *ngIf="link.href.split('.').pop() === 'pdf'"
+                        [src]="this.sanitizeLink('/assets/ViewerJS/#' + link.href.replace('media','download/public'))" width='100%' height='250px' allowfullscreen webkitallowfullscreen></iframe>
+                <iframe *ngIf="link.href.split('.').pop() === 'xls' || link.href.split('.').pop() === 'xlsx'"
+                        [src]="this.sanitizeLink('https://view.officeapps.live.com/op/embed.aspx?src=' + link.href)" width="100%" height="250px" frameborder="1" allowfullscreen webkitallowfullscreen></iframe>
+                <h6 *ngIf="link.href.split('.').pop() === 'jpg' || link.href.split('.').pop() === 'png'">{{link.href.split('/').pop()}}</h6>
+                <img *ngIf="link.href.split('.').pop() === 'jpg' || link.href.split('.').pop() === 'png'"
+                     [src]="this.sanitizeLink(link.href.replace('https://ikeauth.its.hawaii.edu', ''))" style="max-width: 100%;">
+                <div id="tempDiv" style="visibility: hidden;"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <b>Name:</b>&nbsp;{{selectedMetadata.value.well_name}}<br/>
+              <b>ID :</b>&nbsp;{{selectedMetadata.value.wid}}<br/>
+              <b>Island:</b>&nbsp;{{selectedMetadata.value.island}}<br/>
+              <b>Owner:</b>&nbsp;{{selectedMetadata.value.owner_user}}<br/>
+              <b>Year Drilled:</b>&nbsp;{{selectedMetadata.value.yr_drilled}}<br/>
+              <b>Driller:</b>&nbsp;{{selectedMetadata.value.driller}}<br/>
+              <b>Well Depth:</b>&nbsp;{{selectedMetadata.value.well_name}}<br/>
+              <b>Aqui Code:</b>&nbsp;{{selectedMetadata.value.aqui_code}}<br/>
+              <b>Casing Diameter:</b>&nbsp;{{selectedMetadata.value.casing_dia}}<br/>
+              <b>Solid Case:</b>&nbsp;{{selectedMetadata.value.solid_case}}<br/>
+              <b>Use Code:</b>&nbsp;{{selectedMetadata.value.use}}<br/>
+              <b>Geology Code:</b>&nbsp;{{selectedMetadata.value.Geology}}<br/>
+              <b>Ground Elevation:</b>&nbsp;{{selectedMetadata.value.ground_el}}<br/>
+              <b>Bot Hole:</b>&nbsp;{{selectedMetadata.value.bot_hole}}<br/>
+              <b>Bot Perf:</b>&nbsp;{{selectedMetadata.value.bot_perf}}<br/>
+              <b>Bot Solid:</b>&nbsp;{{selectedMetadata.value.bot_solid}}<br/>
+              <b>Pump GPM:</b>&nbsp;{{selectedMetadata.value.pump_gpm}}<br/>
+              <b>Pump MGD:</b>&nbsp;{{selectedMetadata.value.pump_mgd}}<br/>
+              <div *ngFor="let link of selectedMetadata._links.associationIds " style="padding: 5px 0px 5px 0px;">
+                <a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" 
+                   (click)="downloadClick(link.href)">
+                    <img class="images" src="assets/fileicons/{{link.href.split('.').pop()}}.png" height="40px"/>
+                    Download {{link.href.split('/').slice(-1)[0]}}</a>
+              </div>
+              </div>
+            </div>
+          </div>
+<!--
+draft_mgd: null
+draft_mgy: null
+draft_yr: null
+driller: null
+gps: false
+head_feet: null
+init_cl: null
+init_head: null
+init_head2: null
+init_head3: null
+land_owner: null
+lat83dd: 21.70361111
+latest_hd: null
+latitude: 21.70361111
+loc: {type: "Point", coordinates: Array(2)}
+long83dd: -157.9647222
+longitude: -157.9647222
+max_chlor: null
+min_chlor: null
+old_name: null
+old_number: null
+perf_case: 108
+pir: null
+published: "True"
+pump_depth: null
+pump_elev: null
+pump_gpm: 150
+pump_installer: null
+pump_mgd: 0.216
+pump_yr: null
+quad_map: 7
+salinity: null
+spec_capac: null
+surveyor: null
+t: null
+temp_c: null
+temp_f: null
+test_chlor: null
+test_date: null
+test_ddown: null
+test_gpm: null
+test_temp: null
+test_unit: null
+tmk: "(1) 5-6-002:009"
+use_year: null
+utm: true
+wcr: "1980-01-01T00:00:00" -->
+
+        </div>
+      </div>
+
+      <!-- modal-footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bs-dismiss="modal" (click)="hideModal()" >Close</button>
+      </div>
+    </div>
+  </div>
 </div>
