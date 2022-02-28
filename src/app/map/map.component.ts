@@ -152,7 +152,7 @@ export class MapComponent implements OnInit, AfterViewInit {
     this.dataGroups = {
       sites: L.markerClusterGroup({iconCreateFunction: iconCreateFunction("sites"), disableClusteringAtZoom:4}),
       wells: L.markerClusterGroup({iconCreateFunction: iconCreateFunction("wells"), disableClusteringAtZoom:12}),
-      waterQualitySites: L.markerClusterGroup({iconCreateFunction: iconCreateFunction("waterQualitySites")})
+      waterQualitySites: L.markerClusterGroup({iconCreateFunction: iconCreateFunction("waterQualitySites"), disableClusteringAtZoom:12})
     };
 
     let controlGroups: any = {};
@@ -190,7 +190,7 @@ export class MapComponent implements OnInit, AfterViewInit {
     this.mapZoomed = mapZoomed;
     if (this.mapZoomedLatLng) {
       // if Lat Lon is cached, then the map hasn't been drawn for the clicked on location
-      this.drawMapZoomedPoint();
+      this.drawMapZoomedPoint(this.selectedMetadata.name);
     }
   }
 
@@ -345,21 +345,35 @@ export class MapComponent implements OnInit, AfterViewInit {
 
               //details.innerText = JSON.stringify(datum.value);
               //header.innerText=datum.name.replace(/_/g, ' ');
-              if(datum.name == "Water_Quality_Site" && datum.value.resultCount > 0){
-                details.innerHTML = "<br/>Name: "+datum.value.name+"<br/>ID: "+datum.value.MonitoringLocationIdentifier+"<br/>Provider: "+datum.value.ProviderName+"<br/>"+datum.value.description+"<br/>Latitude: "+datum.value.latitude+"<br/>Longitude: "+datum.value.longitude+"<br/><a target='_blank' href='"+datum.value.siteUrl+"'>More Details</a>";
+              if(datum.name == "Water_Quality_Site" && datum.value.resultCount > -1) {
+                details.innerHTML = 
+                  "<br/>Name: "+datum.value.MonitoringLocationName+
+                  "<br/>ID: "+datum.value.MonitoringLocationIdentifier+
+                  // "<br/>Provider: "+datum.value.ProviderName+
+                  // "<br/>"+datum.value.description+
+                  // "<br/>Latitude: "+datum.value.latitude+
+                  // "<br/>Longitude: "+datum.value.longitude+
+                  "<br/>Measurements: "+datum.value.resultCount;
+                if (datum.value.siteUrl) {
+                  details.innerHTML += "<br/><a target='_blank' href='"+datum.value.siteUrl+"'>More Details</a>";
+                }
 
                 download.innerHTML = "<br/><a class='btn btn-success' href='https://www.waterqualitydata.us/Result/search?siteid="+datum.value.MonitoringLocationIdentifier+"&mimeType=csv&zip=yes&sorted=no' target='_blank' > Download "+datum.value.resultCount+" Measurements</a></br>"
               }
               if(datum.name == "Well"){
-                details.innerHTML = "<br/>Name: "+datum.value.well_name+"<br/>ID: "
-                                    +datum.value.wid+"<br/>Use: "+datum.value.use+
-                                    '<br/><i>Click point to view more</i>'
-                                    //"<br/>Driller: "+datum.value.driller+"<br/>Year Drilled: "
-                                    //+datum.value.yr_drilled+"<br/>Surveyor: "+datum.value.surveyor+
-                                    //"<br/>Casing Diameter: "+datum.value.casing_dia+"<br/>Depth: "
-                                    //+datum.value.well_depth+"<br/>Latitude: "+datum.value.latitude
-                                    //+"<br/>Longitude: "+datum.value.longitude+
-                                    //'<br/><button class="btn btn-sm btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#location-modal" onclick="document.getElementById('+"'"+datum.uuid+"'"+').click()">View</button>';
+                details.innerHTML = 
+                  "<br/>Name: "+datum.value.well_name+
+                  "<br/>ID: "+datum.value.wid+
+                  "<br/>Use: "+datum.value.use+
+                  '<br/><i>Click point to view more</i>';
+                  //"<br/>Driller: "+datum.value.driller+
+                  //"<br/>Year Drilled: "+datum.value.yr_drilled+
+                  //"<br/>Surveyor: "+datum.value.surveyor+
+                  //"<br/>Casing Diameter: "+datum.value.casing_dia+
+                  //"<br/>Depth: "+datum.value.well_depth+
+                  //"<br/>Latitude: "+datum.value.latitude+
+                  //"<br/>Longitude: "+datum.value.longitude+
+                  //'<br/><button class="btn btn-sm btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#location-modal" onclick="document.getElementById('+"'"+datum.uuid+"'"+').click()">View</button>';
 
                 let j:number;
                 for(j = 0; j < datum._links.associationIds.length; j++) {
@@ -475,20 +489,34 @@ export class MapComponent implements OnInit, AfterViewInit {
 
               //details.innerText = JSON.stringify(datum.value);
               header.innerText=datum.name.replace(/_/g, ' ');
-              if(datum.name == "Water_Quality_Site" && datum.value.resultCount > 0){
-                details.innerHTML = "<br/>Name: "+datum.value.name+"<br/>ID: "+datum.value.MonitoringLocationIdentifier+"<br/>Provider: "+datum.value.ProviderName+"<br/>"+datum.value.description+"<br/>Latitude: "+datum.value.latitude+"<br/>Longitude: "+datum.value.longitude+"<br/><a target='_blank' href='"+datum.value.siteUrl+"'>More Details</a>";
+              if (datum.name == "Water_Quality_Site" && datum.value.resultCount > 0) {
+                details.innerHTML = 
+                  "<br/>Name: "+datum.value.name+
+                  "<br/>ID: "+datum.value.MonitoringLocationIdentifier+
+                  // "<br/>Provider: "+datum.value.ProviderName+
+                  // "<br/>"+datum.value.description+
+                  // "<br/>Latitude: "+datum.value.latitude+
+                  // "<br/>Longitude: "+datum.value.longitude+
+                  "<br/>Measurements: "+datum.value.resultCount;
+                  if (datum.value.siteUrl) {
+                    details.innerHTML += "<br/><a target='_blank' href='"+datum.value.siteUrl+"'>More Details</a>";
+                  }                  
 
                 download.innerHTML = "<br/><a class='btn btn-success' href='https://www.waterqualitydata.us/Result/search?siteid="+datum.value.MonitoringLocationIdentifier+"&mimeType=csv&zip=yes&sorted=no' target='_blank' > Download "+datum.value.resultCount+" Measurements</a></br>"
               }
               if(datum.name == "Well"){
-                details.innerHTML = "<br/>Name: "+datum.value.well_name+"<br/>ID: "
-                                    +datum.value.wid+"<br/>Use: "+datum.value.use+
-                                    "<br/>Driller: "+datum.value.driller+"<br/>Year Drilled: "
-                                    +datum.value.yr_drilled+"<br/>Surveyor: "+datum.value.surveyor+
-                                    "<br/>Casing Diameter: "+datum.value.casing_dia+"<br/>Depth: "
-                                    +datum.value.well_depth+"<br/>Latitude: "+datum.value.latitude
-                                    +"<br/>Longitude: "+datum.value.longitude+
-                                    '<br/><button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#location-modal" (click)="openModalDialog('+datum+')">View</button>';
+                details.innerHTML = 
+                  "<br/>Name: "+datum.value.well_name+
+                  "<br/>ID: "+datum.value.wid+
+                  "<br/>Use: "+datum.value.use+
+                  "<br/>Driller: "+datum.value.driller+
+                  "<br/>Year Drilled: "+datum.value.yr_drilled+
+                  "<br/>Surveyor: "+datum.value.surveyor+
+                  "<br/>Casing Diameter: "+datum.value.casing_dia+
+                  "<br/>Depth: "+datum.value.well_depth+
+                  "<br/>Latitude: "+datum.value.latitude+
+                  "<br/>Longitude: "+datum.value.longitude+
+                  '<br/><button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#location-modal" (click)="openModalDialog('+datum+')">View</button>';
 
                 let j:number;
                 for(j = 0; j < datum._links.associationIds.length; j++) {
@@ -575,7 +603,7 @@ export class MapComponent implements OnInit, AfterViewInit {
       case "waterQualitySites": {
         icon = new L.Icon({
           iconUrl: 'assets/markers/marker-icon-green.png',
-          iconRetinaUrl: 'assets/markers/marker-icon-2x-green.png',
+          iconRetinaUrl: 'assets/markers/marker-icon-green.png',
           shadowUrl: "assets/marker-shadow.png"
         });
         break;
@@ -583,7 +611,7 @@ export class MapComponent implements OnInit, AfterViewInit {
       case "sites": {
         icon = new L.Icon({
           iconUrl: 'assets/markers/marker-icon-red.png',
-          iconRetinaUrl: 'assets/markers/marker-icon-2x-red.png',
+          iconRetinaUrl: 'assets/markers/marker-icon-red.png',
           shadowUrl: "assets/marker-shadow.png"
         });
         break;
@@ -591,7 +619,7 @@ export class MapComponent implements OnInit, AfterViewInit {
       case "wells": {
         icon = new L.Icon({
           iconUrl: 'assets/marker-icon.png',
-          iconRetinaUrl: 'assets/marker-icon-2x.png',
+          iconRetinaUrl: 'assets/marker-icon.png',
           //shadowUrl: "assets/marker-shadow.png",
           iconSize:[15,25]
         });
@@ -602,102 +630,140 @@ export class MapComponent implements OnInit, AfterViewInit {
   }
 
 
-    markerClick(e)  {
-      console.log("Marker CLICKed")
-      console.log(e)
-      let datum = e.sourceTarget.feature.geometry.properties;
-      //console.log(this.selectedMetadata)
-      
-      document.getElementById('filterField').focus();
-      if (!document.getElementById(datum.uuid)) {
-      
-        // if (document.getElementById('filterField').value) {
-        //  document.getElementById('filterField').value = "";
-        // }
-      
-      } else {
-        document.getElementById('location-modal').style.display='block';
-      }
+  markerClick(e)  {
+    console.log("Marker CLICKed")
+    console.log(e)
+    let datum = e.sourceTarget.feature.geometry.properties;
+    //console.log(this.selectedMetadata)
 
-      if (document.getElementById(datum.uuid)) {
-        document.getElementById(datum.uuid).focus();
-	    document.getElementById(datum.uuid).click();
-      }
-    }
-	
-    openModalDialog(site)  {
-      console.log("HEYYYYYYYY")
-      console.log(site)
-      this.selectedMetadata = site;
-      this.openMapZoomed(site); // small map on modal screen
-      console.log(this.selectedMetadata)
-    }
-	
-	openLinkedPopup(site) {
-      var tempLL = L.latLng([site.value.latitude,site.value.longitude]);
-	  let details = L.DomUtil.create("div");
-      if (site.name == "Well") {
-        details.innerHTML = "<br/>Name: "+site.value.well_name+"<br/>ID: "
-                            +site.value.wid+"<br/>Use: "+site.value.use+
-                            '<br/><i>Click point to view more</i>';
-      }
-      L.popup()
-        .setLatLng(tempLL)
-        .setContent(details)
-        .openOn(this.map);
-	}
-    
+    document.getElementById('filterField').focus();
+    if (!document.getElementById(datum.uuid)) {
 
-    openMapZoomed(site) {
-      // cache current Lat Lon. when map is ready it will call drawMapZoomedPoint (onMapZoomedReady())
-      this.mapZoomedLatLng = L.latLng([site.value.latitude,site.value.longitude]);
-      if (this.mapZoomed) {
-        // because small map is on the modal screen, map may not be ready yet. only draw circle if map is ready
-        this.drawMapZoomedPoint();
-      }
-    }
-    
-    drawMapZoomedPoint() {
-      // move to the clicked location and draw a circle
-      this.mapZoomed.setView(this.mapZoomedLatLng, 12);
-      if (this.mapZoomedCircle) {
-        // remove previous circle
-        this.mapZoomed.removeLayer(this.mapZoomedCircle);
-        this.mapZoomedCircle = null;
-      }
+      // if (document.getElementById('filterField').value) {
+      //  document.getElementById('filterField').value = "";
+      // }
 
-      let icon = this.getIconByGroup("wells");
-      // this.mapZoomedCircle = L.circleMarker(latlng, {radius:5,opacity: 1,fillOpacity: 0.9,color:'gray'})      
-      // this.mapZoomedCircle = L.circle(this.mapZoomedLatLng, {fillOpacity: 1, radius: 100}).addTo(this.mapZoomed);
-      this.mapZoomedCircle = L.marker(this.mapZoomedLatLng, {icon}).addTo(this.mapZoomed);
-
-      // remove Lat Lon cache
-      this.mapZoomedLatLng = null;
+    } else {
+      // document.getElementById('location-modal').style.display='block';
     }
 
-    sanitizeLink(fileLink) {
-      var tempDiv = document.getElementById('tempDiv');
-      // if it's the same link, no need to sanitize
-      if (fileLink != tempDiv.innerHTML) {
-        // sanitize the given link. from http://shebang.mintern.net/foolproof-html-escaping-in-javascript/
-        tempDiv.innerHTML = "";
-        tempDiv.appendChild(document.createTextNode(fileLink));
-        fileLink = tempDiv.innerHTML;
+    if (document.getElementById(datum.uuid)) {
+      document.getElementById(datum.uuid).focus();
+      document.getElementById(datum.uuid).click();
+    }
+  }
+
+  openModalDialog(site)  {
+    this.setModalOpen(true);
+    console.log("HEYYYYYYYY")
+    console.log(site)
+    this.selectedMetadata = site;    
+    this.openMapZoomed(site); // small map on modal screen    
+    console.log(this.selectedMetadata)
+  }
+
+  openLinkedPopup(site) {
+    this.setModalOpen(false);
+    var tempLL = L.latLng([site.value.latitude,site.value.longitude]);
+    let details = L.DomUtil.create("div");
+    if (site.name == "Well") {
+      details.innerHTML = 
+        "<br/>Name: "+site.value.well_name+
+        "<br/>ID: "+site.value.wid+
+        "<br/>Use: "+site.value.use+
+        "<br/><i>Click point to view more</i>";
+    } else if (site.name == "Water_Quality_Site") {
+      details.innerHTML = 
+        "<br/>Name: "+site.value.MonitoringLocationName+
+        // "<br/>ID: "+site.value.MonitoringLocationIdentifier+
+        // "<br/>Provider: "+site.value.ProviderName+
+        "<br/>"+site.value.description+
+        // "<br/>Latitude: "+site.value.latitude+
+        // "<br/>Longitude: "+site.value.longitude+
+        "<br/>Measurements: "+site.value.resultCount;
+        // "<br/><i>Click point to view more</i>";
+      if (site.value.resultCount > 0) {
+        details.innerHTML += "<br/><a target='_blank' href='"+site.value.siteUrl+"'>More Details</a>";
       }
       
-      // test resource URLs:
-      // return this.sanitizer.bypassSecurityTrustResourceUrl('https://view.officeapps.live.com/op/embed.aspx?src=http://www.hawaii.edu/elp/library/librarymaster-author-editor.xls');
-      // return this.sanitizer.bypassSecurityTrustResourceUrl('/assets/nsf-logo.png');
-      
-      // to avoid the error that the text is not sanitized
-      return this.sanitizer.bypassSecurityTrustResourceUrl(fileLink);
+    } else {
+      console.log(site);    
+    }    
+    L.popup()
+      .setLatLng(tempLL)
+      .setContent(details)
+      .openOn(this.map);
+  }
+
+  openMapZoomed(site) {
+    // cache current Lat Lon. when map is ready it will call drawMapZoomedPoint (onMapZoomedReady())
+    this.mapZoomedLatLng = L.latLng([site.value.latitude,site.value.longitude]);
+    if (this.mapZoomed) {
+      // because small map is on the modal screen, map may not be ready yet. only draw circle if map is ready
+      this.drawMapZoomedPoint(site.name);
+    }    
+  }
+
+  drawMapZoomedPoint(groupName) {
+    // move to the clicked location and draw a circle
+    this.mapZoomed.setView(this.mapZoomedLatLng, 12);
+    if (this.mapZoomedCircle) {
+      // remove previous circle
+      this.mapZoomed.removeLayer(this.mapZoomedCircle);
+      this.mapZoomedCircle = null;
     }
-    
-    hideModal():void {
-      // this interferes with the small map.
-      // this.selectedMetadata = null;
-      //$("#location-modal").modal('hide');
+
+    var groupNameCode = "wells";
+    if (groupName == "Site") {
+      groupNameCode = "sites";
+    } else if (groupName == "Water_Quality_Site") {
+      groupNameCode = "waterQualitySites";
     }
+    let icon = this.getIconByGroup(groupNameCode);
+    // this.mapZoomedCircle = L.circleMarker(latlng, {radius:5,opacity: 1,fillOpacity: 0.9,color:'gray'})      
+    // this.mapZoomedCircle = L.circle(this.mapZoomedLatLng, {fillOpacity: 1, radius: 100}).addTo(this.mapZoomed);
+    this.mapZoomedCircle = L.marker(this.mapZoomedLatLng, {icon}).addTo(this.mapZoomed);
+
+    // remove Lat Lon cache
+    this.mapZoomedLatLng = null;
+  }
+
+  modalOpenFlag = false;
+  
+  sanitizeLink(fileLink) {
+    if (!this.getModalOpen()) {
+      return fileLink;
+    }
+    var tempDiv = document.getElementById('tempDiv');
+    // if it's the same link, no need to sanitize
+    if (fileLink != tempDiv.innerHTML) {
+      // sanitize the given link. from http://shebang.mintern.net/foolproof-html-escaping-in-javascript/
+      tempDiv.innerHTML = "";
+      tempDiv.appendChild(document.createTextNode(fileLink));
+      fileLink = tempDiv.innerHTML;
+    }
+
+    // test resource URLs:
+    // return this.sanitizer.bypassSecurityTrustResourceUrl('https://view.officeapps.live.com/op/embed.aspx?src=http://www.hawaii.edu/elp/library/librarymaster-author-editor.xls');
+    // return this.sanitizer.bypassSecurityTrustResourceUrl('/assets/nsf-logo.png');
+
+    // to avoid the error that the text is not sanitized
+    return this.sanitizer.bypassSecurityTrustResourceUrl(fileLink);
+  }
+  
+  setModalOpen(currentState) {
+    this.modalOpenFlag = currentState;
+  }
+  
+  getModalOpen() {
+    return this.modalOpenFlag;
+  }
+
+  hideModal():void {
+    // this interferes with the small map.
+    // this.selectedMetadata = null;
+    //$("#location-modal").modal('hide');
+  }
 
   gotoEntry(index: number) {
     //event.stopPropagation();
