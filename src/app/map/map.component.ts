@@ -125,7 +125,7 @@ export class MapComponent implements OnInit, AfterViewInit {
       +'</div>'
       return legend;
     }
-    legendControl.addTo(this.map);
+    //legendControl.addTo(this.map);
 
     let iconCreateFunction = (group: string): (cluster: any) => L.DivIcon => {
 
@@ -320,7 +320,7 @@ export class MapComponent implements OnInit, AfterViewInit {
       for(i = 0; i < indices.length; i++) {
         let index = Number(indices[i]);
         let datum = data[index];
-      //  if((datum.name=="Water_Quality_Site" && datum.value.resultCount > 0)) || datum._links.associationIds.length > 0){
+        if((datum.name=="Well") ||(datum.name=="Water_Quality_Site" && datum.value.resultCount > 0)) {
           this.metadata.push(datum)
           let group = NameGroupMap[datum.name];
           //console.log(datum.value.loc);
@@ -345,7 +345,7 @@ export class MapComponent implements OnInit, AfterViewInit {
 
               //details.innerText = JSON.stringify(datum.value);
               //header.innerText=datum.name.replace(/_/g, ' ');
-              if(datum.name == "Water_Quality_Site" && datum.value.resultCount > -1) {
+              if(datum.name == "Water_Quality_Site" && datum.value.activityCount > 0) {
                 details.innerHTML = 
                   "<br/>Name: "+datum.value.MonitoringLocationName+
                   "<br/>ID: "+datum.value.MonitoringLocationIdentifier+
@@ -422,6 +422,7 @@ export class MapComponent implements OnInit, AfterViewInit {
           this.filterData = this.metadata;
           this.dtTrigger.next();
       }
+    }
     });
   }
   

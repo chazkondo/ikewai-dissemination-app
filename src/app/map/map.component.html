@@ -27,7 +27,7 @@
           <th class='header'>Files</th>
       </tr>
       <tr *ngFor="let metadatum of filterData">
-        <ng-container *ngIf="metadatum.name=== 'Site' || metadatum.name=== 'Well' || (metadatum.name=== 'Water_Quality_Site' && metadatum.value.resultCount > -1)">
+        <ng-container *ngIf="metadatum.name=== 'Site' || metadatum.name=== 'Well' || (metadatum.name=== 'Water_Quality_Site' && metadatum.value.activityCount > 0)">
           <td >
             <button id="linked-{{metadatum.uuid}}" class="btn btn-primary" type="button" (click)="openLinkedPopup(metadatum)">Find</button>
           </td>
