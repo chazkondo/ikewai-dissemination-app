@@ -14,16 +14,20 @@
     <div *ngIf="metadata.length > 0" style="height:500px;">
     <h5>Results {{filterData.length}}</h5>
     <input class="form" type="text" (keyup)='tableSearch($event.target.value)' placeholder="Filter Results" id="filterField">
+    <img src="/assets/fileicons/site.png" style="width: 20px; padding: 2px;"> Site
+    <img src="/assets/fileicons/well.png" style="width: 20px; padding: 2px;"> Well
+    <img src="/assets/fileicons/waterQualitySite.png" style="width: 20px; padding: 2px;"> Water Quality Site
     <div style="overflow: auto; height:440px;" class="table-responsive">
     <table  class="table row-border hover table-striped">
       <tr >
           <th class='header'></th>
-          <th class='header'>ID</th>
+          <th class='header'></th>
           <th class='header'>Name</th>
           <th class='header'>Drilled</th>
           <th class='header'>Files</th>
       </tr>
       <tr *ngFor="let metadatum of filterData">
+        <ng-container *ngIf="metadatum.name=== 'Site' || metadatum.name=== 'Well' || (metadatum.name=== 'Water_Quality_Site' && metadatum.value.resultCount > -1)">
           <td >
             <button id="linked-{{metadatum.uuid}}" class="btn btn-primary" type="button" (click)="openLinkedPopup(metadatum)">Find</button>
           </td>
@@ -31,6 +35,9 @@
             <button id="{{metadatum.uuid}}" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#location-modal" (click)="openModalDialog(metadatum)">View</button>
           </td>
           <td width="40%">
+            <img *ngIf="metadatum.name=== 'Water_Quality_Site'" src="/assets/fileicons/waterQualitySite.png" style="width: 30px; padding: 5px;">
+            <img *ngIf="metadatum.name=== 'Well'" src="/assets/fileicons/well.png" style="width: 30px; padding: 5px;">
+            <img *ngIf="metadatum.name=== 'Site'" src="/assets/fileicons/site.png" style="width: 30px; padding: 5px;">
             <span #entries>{{metadatum.value.name}}</span>
             <span #entries>{{metadatum.value.station_name}}</span>
             <span #entries>{{metadatum.value.well_name}}</span>
@@ -50,8 +57,9 @@
                 </span>
             </div>
           </td>
-        </tr>
-      </table>
+        </ng-container>        
+      </tr>
+    </table>
       </div>
       </div>
     </div>
@@ -65,7 +73,20 @@
     <div *ngIf="selectedMetadata"  class="modal-content">
       <!-- modal-header -->
       <div class="modal-header">
-        <h3>{{selectedMetadata.value.well_name}}</h3>
+        <h3>
+          <ng-container *ngIf="selectedMetadata.name == 'Well'">
+            <img src="/assets/fileicons/well.png" style="width: 50px; padding: 2px;">
+            {{selectedMetadata.value.well_name}}
+          </ng-container>
+          <ng-container *ngIf="selectedMetadata.name == 'Site'">
+            <img src="/assets/fileicons/site.png" style="width: 50px; padding: 2px;">
+            {{selectedMetadata.value.name}}
+          </ng-container>
+          <ng-container *ngIf="selectedMetadata.name == 'Water_Quality_Site'">
+            <img src="/assets/fileicons/waterQualitySite.png" style="width: 50px; padding: 2px;">
+            {{selectedMetadata.value.name}}
+          </ng-container>          
+        </h3>
          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         <!-- <h4 class="modal-title">Login</h4> -->
       </div>
@@ -73,6 +94,7 @@
       <!-- modal-body -->
       <div class="modal-body">
         <div>
+          <div id="tempDiv" style="visibility: hidden;"></div>
           <div class="container-fluid">
           <div class="row">
             <div class="col-md-6">
@@ -80,44 +102,74 @@
                 [leafletOptions]="optionsZoomed" 
                 (leafletMapReady)="onMapZoomedReady($event)" >
               </div>
-              <div *ngFor="let link of selectedMetadata._links.associationIds " style="padding: 5px 0px 5px 0px;" id="dataPreview" >
-                <iframe *ngIf="link.href.split('.').pop() === 'pdf'"
-                        [src]="this.sanitizeLink('/assets/ViewerJS/#' + link.href.replace('media','download/public'))" width='100%' height='250px' allowfullscreen webkitallowfullscreen></iframe>
-                <iframe *ngIf="link.href.split('.').pop() === 'xls' || link.href.split('.').pop() === 'xlsx'"
-                        [src]="this.sanitizeLink('https://view.officeapps.live.com/op/embed.aspx?src=' + link.href)" width="100%" height="250px" frameborder="1" allowfullscreen webkitallowfullscreen></iframe>
-                <h6 *ngIf="link.href.split('.').pop() === 'jpg' || link.href.split('.').pop() === 'png'">{{link.href.split('/').pop()}}</h6>
-                <img *ngIf="link.href.split('.').pop() === 'jpg' || link.href.split('.').pop() === 'png'"
-                     [src]="this.sanitizeLink(link.href.replace('https://ikeauth.its.hawaii.edu', ''))" style="max-width: 100%;">
-                <div id="tempDiv" style="visibility: hidden;"></div>
-              </div>
+              <ng-container *ngIf="this.getModalOpen();">
+                <ng-container *ngIf="selectedMetadata.name === 'Well'">
+                  <div *ngFor="let link of selectedMetadata._links.associationIds" style="padding: 5px 0px 5px 0px;" id="dataPreview">
+                    <ng-container *ngIf="link.href.split('.').pop() === 'pdf'">
+                      <iframe [src]="this.sanitizeLink('/assets/ViewerJS/#' + link.href.replace('media','download/public'))" width='100%' height='250px' allowfullscreen webkitallowfullscreen></iframe>
+                    </ng-container>
+                    <ng-container *ngIf="(link.href.split('.').pop() === 'xls' || link.href.split('.').pop() === 'xlsx')">
+                      <iframe [src]="this.sanitizeLink('https://view.officeapps.live.com/op/embed.aspx?src=' + link.href)" width="100%" height="250px" frameborder="1" allowfullscreen webkitallowfullscreen></iframe>
+                    </ng-container>
+                    <ng-container *ngIf="(link.href.split('.').pop() === 'jpg' || link.href.split('.').pop() === 'png')">
+                      <h6>{{link.href.split('/').pop()}}</h6>
+                      <img [src]="this.sanitizeLink(link.href.replace('https://ikeauth.its.hawaii.edu', ''))" style="max-width: 100%;">
+                    </ng-container>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="(selectedMetadata.name === 'Water_Quality_Site' && selectedMetadata.value.resultCount > 0)">
+                  <iframe [src]="this.sanitizeLink('https://view.officeapps.live.com/op/embed.aspx?src=https://www.waterqualitydata.us/Result/search%3Fsiteid%3D' + selectedMetadata.value.MonitoringLocationIdentifier + '%26mimeType%3Dxlsx%26zip%3Dno%26sorted%3Dno')" width="100%" height="250px" frameborder="1" allowfullscreen webkitallowfullscreen></iframe>
+                </ng-container>
+              </ng-container>
             </div>
             <div class="col-md-4">
-              <b>Name:</b>&nbsp;{{selectedMetadata.value.well_name}}<br/>
-              <b>ID :</b>&nbsp;{{selectedMetadata.value.wid}}<br/>
-              <b>Island:</b>&nbsp;{{selectedMetadata.value.island}}<br/>
-              <b>Owner:</b>&nbsp;{{selectedMetadata.value.owner_user}}<br/>
-              <b>Year Drilled:</b>&nbsp;{{selectedMetadata.value.yr_drilled}}<br/>
-              <b>Driller:</b>&nbsp;{{selectedMetadata.value.driller}}<br/>
-              <b>Well Depth:</b>&nbsp;{{selectedMetadata.value.well_name}}<br/>
-              <b>Aqui Code:</b>&nbsp;{{selectedMetadata.value.aqui_code}}<br/>
-              <b>Casing Diameter:</b>&nbsp;{{selectedMetadata.value.casing_dia}}<br/>
-              <b>Solid Case:</b>&nbsp;{{selectedMetadata.value.solid_case}}<br/>
-              <b>Use Code:</b>&nbsp;{{selectedMetadata.value.use}}<br/>
-              <b>Geology Code:</b>&nbsp;{{selectedMetadata.value.Geology}}<br/>
-              <b>Ground Elevation:</b>&nbsp;{{selectedMetadata.value.ground_el}}<br/>
-              <b>Bot Hole:</b>&nbsp;{{selectedMetadata.value.bot_hole}}<br/>
-              <b>Bot Perf:</b>&nbsp;{{selectedMetadata.value.bot_perf}}<br/>
-              <b>Bot Solid:</b>&nbsp;{{selectedMetadata.value.bot_solid}}<br/>
-              <b>Pump GPM:</b>&nbsp;{{selectedMetadata.value.pump_gpm}}<br/>
-              <b>Pump MGD:</b>&nbsp;{{selectedMetadata.value.pump_mgd}}<br/>
-              <div *ngFor="let link of selectedMetadata._links.associationIds " style="padding: 5px 0px 5px 0px;">
-                <a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" 
-                   (click)="downloadClick(link.href)">
-                    <img class="images" src="assets/fileicons/{{link.href.split('.').pop()}}.png" height="40px"/>
-                    Download {{link.href.split('/').slice(-1)[0]}}</a>
-              </div>
-              </div>
+              <ng-container *ngIf="selectedMetadata.name === 'Water_Quality_Site'">
+                <b>Name:</b>&nbsp;{{selectedMetadata.value.name}}<br/>
+                <b>ID:</b>&nbsp;{{selectedMetadata.value.MonitoringLocationIdentifier}}<br/>
+                <b>Type:</b>&nbsp;{{selectedMetadata.value.MonitoringLocationTypeName}}<br/>
+                <b>Provider Name:</b>&nbsp;{{selectedMetadata.value.ProviderName}}<br/>
+                <b>HUC 8 digit code:</b>&nbsp;{{selectedMetadata.value.HUCEightDigitCode}}<br/>
+                <b>Org Name:</b>&nbsp;{{selectedMetadata.value.OrganizationFormalName}}<br/>
+                <b>Org ID:</b>&nbsp;{{selectedMetadata.value.OrganizationIdentifier}}<br/>
+                <b>Description:</b>&nbsp;{{selectedMetadata.value.description}}<br/>
+                <b>Longitude:</b>&nbsp;{{selectedMetadata.value.longitude}}<br/>
+                <b>Latitude:</b>&nbsp;{{selectedMetadata.value.latitude}}<br/>
+                <span *ngIf="selectedMetadata.value.resultCount > 0">
+                  <a href="{{selectedMetadata.value.siteUrl}}" target="{{selectedMetadata.value.MonitoringLocationIdentifier}}">Site URL</a><br/>
+                  <a class="btn btn-success" href='https://www.waterqualitydata.us/Result/search?siteid={{selectedMetadata.value.MonitoringLocationIdentifier}}&mimeType=csv&zip=yes&sorted=no' target="_blank" > Download {{selectedMetadata.value.resultCount}} Measurements</a>
+                </span>                
+              </ng-container>            
+              <ng-container *ngIf="selectedMetadata.name === 'Site'">
+
+              </ng-container>
+              <ng-container *ngIf="selectedMetadata.name === 'Well'">
+                <b>Name:</b>&nbsp;{{selectedMetadata.value.well_name}}<br/>
+                <b>ID :</b>&nbsp;{{selectedMetadata.value.wid}}<br/>
+                <b>Island:</b>&nbsp;{{selectedMetadata.value.island}}<br/>
+                <b>Owner:</b>&nbsp;{{selectedMetadata.value.owner_user}}<br/>
+                <b>Year Drilled:</b>&nbsp;{{selectedMetadata.value.yr_drilled}}<br/>
+                <b>Driller:</b>&nbsp;{{selectedMetadata.value.driller}}<br/>
+                <b>Well Depth:</b>&nbsp;{{selectedMetadata.value.well_name}}<br/>
+                <b>Aqui Code:</b>&nbsp;{{selectedMetadata.value.aqui_code}}<br/>
+                <b>Casing Diameter:</b>&nbsp;{{selectedMetadata.value.casing_dia}}<br/>
+                <b>Solid Case:</b>&nbsp;{{selectedMetadata.value.solid_case}}<br/>
+                <b>Use Code:</b>&nbsp;{{selectedMetadata.value.use}}<br/>
+                <b>Geology Code:</b>&nbsp;{{selectedMetadata.value.Geology}}<br/>
+                <b>Ground Elevation:</b>&nbsp;{{selectedMetadata.value.ground_el}}<br/>
+                <b>Bot Hole:</b>&nbsp;{{selectedMetadata.value.bot_hole}}<br/>
+                <b>Bot Perf:</b>&nbsp;{{selectedMetadata.value.bot_perf}}<br/>
+                <b>Bot Solid:</b>&nbsp;{{selectedMetadata.value.bot_solid}}<br/>
+                <b>Pump GPM:</b>&nbsp;{{selectedMetadata.value.pump_gpm}}<br/>
+                <b>Pump MGD:</b>&nbsp;{{selectedMetadata.value.pump_mgd}}<br/>
+                <div *ngFor="let link of selectedMetadata._links.associationIds " style="padding: 5px 0px 5px 0px;">
+                  <a href="#" *ngIf="link.href.indexOf('ikewai-annotated') !== -1" class="btn btn-success btn-sm" 
+                     (click)="downloadClick(link.href)">
+                      <img class="images" src="assets/fileicons/{{link.href.split('.').pop()}}.png" height="40px"/>
+                      Download {{link.href.split('/').slice(-1)[0]}}</a>
+                </div>
+              </ng-container>
             </div>
+          </div>            
           </div>
 <!--
 draft_mgd: null
